@@ -86,7 +86,7 @@ const UserView = () => {
       // Draw logo
       doc.addImage(logoImg, 'JPEG', 10, 10, 30, 30);
   
-      // Header
+      // Header (left side, outside the box)
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(18);
       doc.text('INSTITUTO VALLE DE CHIAPAS, SC', 60, 18);
@@ -97,23 +97,40 @@ const UserView = () => {
       doc.text('AV. CENTRAL PONIENTE No. 429 COL. CENTRO  CP. 29000', 60, 34);
       doc.text('TEL. 61 3 61 56  TUXTLA GUTIERREZ, CHIAPAS', 60, 39);
       doc.text('REGIMEN SIMPLIFICADO DE CONFIANZA', 60, 44);
-  
-      // "IUCh" logo text (right)
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(16);
-      doc.text('IUCH', 250, 18);
-      doc.setFontSize(8);
-      doc.setFont('helvetica', 'normal');
-      doc.text('UN PASO ADELANTE EN EDUCACION', 245, 23);
-  
-      // Recibo de pago box
+
+      // Recibo de pago box (right side)
       doc.setDrawColor(0);
       doc.setLineWidth(0.5);
-      doc.rect(220, 15, 60, 20);
+      doc.rect(220, 15, 70, 35); // Wider and taller box
+
+      // Content inside the box
+      const boxX = 220;
+      const boxY = 15;
+      // Centered "IUCH" at the top of the box
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(16);
+      doc.text('IUCH', boxX + 35, boxY + 10, { align: 'center' });
+
+      // "RECIBO DE PAGO" below
+      doc.setFont('helvetica', 'normal');
       doc.setFontSize(12);
-      doc.text('RECIBO DE PAGO', 225, 23);
+      doc.text('RECIBO DE PAGO', boxX + 10, boxY + 18);
+
+      // Slogan below
+      doc.setFontSize(8);
+      doc.text('UN PASO ADELANTE EN EDUCACION', boxX + 10, boxY + 24);
+
+      // Folio number at the bottom of the box
       doc.setFontSize(10);
-      doc.text(`FOLIO No ${folio.folio}`, 225, 32);
+      doc.text(`FOLIO No ${folio.folio}`, boxX + 10, boxY + 31);
+
+      // (REMOVE these lines, they are not needed anymore)
+      // doc.setFont('helvetica', 'bold');
+      // doc.setFontSize(16);
+      // doc.text('IUCH', 250, 18);
+      // doc.setFontSize(8);
+      // doc.setFont('helvetica', 'normal');
+      // doc.text('UN PASO ADELANTE EN EDUCACION', 245, 23);
   
       // Date and location
       doc.setFontSize(10);
