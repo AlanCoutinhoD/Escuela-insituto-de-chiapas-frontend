@@ -26,6 +26,8 @@ const AddStudentModal = ({ open, onClose }) => {
     nivel_educativo: '',
     telefono: '',
     email: '',
+    tutor: '', // <-- new field
+    'numero telefonico tutor': '', // <-- new field
   });
 
   const handleChange = (e) => {
@@ -160,6 +162,24 @@ const AddStudentModal = ({ open, onClose }) => {
             placeholder="(961) 123-4567"
             sx={{ mb: 2 }}
             required
+          />
+          <TextField
+            fullWidth
+            label="Tutor"
+            name="tutor"
+            value={formData.tutor}
+            onChange={handleChange}
+            placeholder="Nombre del tutor"
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            fullWidth
+            label="Número Telefónico Tutor"
+            name="numero telefonico tutor"
+            value={formData['numero telefonico tutor']}
+            onChange={handleChange}
+            placeholder="(961) 123-4567"
+            sx={{ mb: 2 }}
           />
         </form>
       </DialogContent>

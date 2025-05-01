@@ -14,13 +14,18 @@ import CloseIcon from '@mui/icons-material/Close';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import jsPDF from 'jspdf';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker'; // If using MUI X DatePicker
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import dayjs from 'dayjs';
 
 const CreatePaymentModal = ({ open, onClose, student }) => {
   const [formData, setFormData] = useState({
-    mes_pago: '',
-    anio_pago: new Date().getFullYear(),
+    nota: '',
+    abono: '',
     total: '',
   });
+  const [selectedDate, setSelectedDate] = useState(null);
 
   const handleChange = (e) => {
     setFormData({
@@ -29,14 +34,19 @@ const CreatePaymentModal = ({ open, onClose, student }) => {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
+    const mes_pago = selectedDate ? dayjs(selectedDate).month() + 1 : null;
+    const anio_pago = selectedDate ? dayjs(selectedDate).year() : null;
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/payments/create`,
         {
-          ...formData,
+          mes_pago,
+          anio_pago,
+          nota: formData.nota,
+          abono: formData.abono,
+          total: formData.total,
           student_id: student.id
         },
         {
@@ -127,28 +137,30 @@ const CreatePaymentModal = ({ open, onClose, student }) => {
         <Typography variant="subtitle1" sx={{ mb: 2 }}>
           Estudiante: {student?.nombre} {student?.apellido_paterno} {student?.apellido_materno}
         </Typography>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <DatePicker
+            label="Mes y Año de Pago"
+            views={['year', 'month']}
+            value={selectedDate}
+            onChange={setSelectedDate}
+            renderInput={(params) => <TextField {...params} fullWidth sx={{ mb: 2 }} />}
+          />
+        </LocalizationProvider>
         <TextField
-          select
           fullWidth
-          label="Mes de Pago"
-          name="mes_pago"
-          value={formData.mes_pago}
+          label="Nota"
+          name="nota"
+          value={formData.nota}
           onChange={handleChange}
           sx={{ mb: 2 }}
           required
-        >
-          {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
-            <MenuItem key={month} value={month}>
-              {new Date(0, month - 1).toLocaleString('es-ES', { month: 'long' })}
-            </MenuItem>
-          ))}
-        </TextField>
+        />
         <TextField
           fullWidth
-          label="Año de Pago"
-          name="anio_pago"
+          label="Abono"
+          name="abono"
           type="number"
-          value={formData.anio_pago}
+          value={formData.abono}
           onChange={handleChange}
           sx={{ mb: 2 }}
           required

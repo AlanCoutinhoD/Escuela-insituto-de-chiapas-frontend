@@ -23,6 +23,8 @@ const EditStudentModal = ({ open, onClose, student }) => {
     nivel_educativo: '',
     telefono: '',
     email: '',
+    tutor: '', // <-- new field
+    numero_telefonico_tutor: '', // <-- new field
   });
 
   useEffect(() => {
@@ -35,6 +37,8 @@ const EditStudentModal = ({ open, onClose, student }) => {
         nivel_educativo: student.nivel_educativo || '',
         telefono: student.telefono || '',
         email: student.email || '',
+        tutor: student.tutor || '',
+        numero_telefonico_tutor: student.numero_telefonico_tutor || '', // <-- updated here
       });
     }
   }, [student]);
@@ -161,6 +165,22 @@ const EditStudentModal = ({ open, onClose, student }) => {
           type="email"
           value={formData.email}
           onChange={handleChange}
+        />
+        <TextField
+          fullWidth
+          label="Tutor"
+          name="tutor"
+          value={formData.tutor}
+          onChange={handleChange}
+          sx={{ mb: 2 }}
+        />
+        <TextField
+          fullWidth
+          label="Número Telefónico Tutor"
+          name="numero_telefonico_tutor" // <-- updated here
+          value={formData.numero_telefonico_tutor} // <-- updated here
+          onChange={handleChange}
+          sx={{ mb: 2 }}
         />
       </DialogContent>
       <DialogActions sx={{ p: 2 }}>

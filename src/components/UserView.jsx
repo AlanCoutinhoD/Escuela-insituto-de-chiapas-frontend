@@ -11,14 +11,14 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-  Paper,              // <-- Add this
-  TableContainer,     // <-- Add this
-  Table,              // <-- Add this
-  TableHead,          // <-- Add this
-  TableRow,           // <-- Add this
-  TableCell,          // <-- Add this
-  TableBody,          // <-- Add this
-  IconButton // <-- Add this
+  Paper,
+  TableContainer,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  IconButton
 } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import PeopleIcon from '@mui/icons-material/People';
@@ -28,19 +28,20 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import PaymentsView from './PaymentsView';
 import StudentsView from './StudentsView';
-import axios from 'axios'; // <-- Add this if not already imported
+import axios from 'axios';
 import PrintIcon from '@mui/icons-material/Print';
-import CreatePaymentModal from './CreatePaymentModal'; // <-- Import if you want to reuse modal
-import jsPDF from 'jspdf'; // <-- Import if you want to call PDF logic directly
+import CreatePaymentModal from './CreatePaymentModal';
+import jsPDF from 'jspdf';
 
 const drawerWidth = 240;
 
 const UserView = () => {
   const navigate = useNavigate();
   const [currentView, setCurrentView] = useState('students');
-  const [folios, setFolios] = useState([]); // <-- Add this
-  const [selectedFolio, setSelectedFolio] = useState(null); // <-- Add this
-  const [openPrintModal, setOpenPrintModal] = useState(false); // <-- Add this
+  const [folios, setFolios] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [selectedFolio, setSelectedFolio] = useState(null);
+  const [openPrintModal, setOpenPrintModal] = useState(false);
 
   // Fetch folios from backend
   useEffect(() => {
@@ -62,6 +63,28 @@ const UserView = () => {
     };
     fetchFolios();
   }, []);
+
+  // Fetch students from backend
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}/students/all`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }
+        );
+        setStudents(response.data);
+      } catch (error) {
+        // Optionally handle error
+      }
+    };
+    fetchStudents();
+  }, []);
+
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
   const handleLogout = () => {
@@ -70,7 +93,6 @@ const UserView = () => {
     navigate('/', { replace: true });
   };
 
-  // Fix: Only one closing brace for this function!
   const handlePrintFolio = async (folio) => {
     const doc = new jsPDF({
       orientation: 'landscape',
@@ -85,7 +107,7 @@ const UserView = () => {
     logoImg.onload = function() {
       // Draw logo
       doc.addImage(logoImg, 'JPEG', 10, 10, 30, 30);
-  
+
       // Header (left side, outside the box)
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(18);
@@ -124,64 +146,65 @@ const UserView = () => {
       doc.setFontSize(10);
       doc.text(`FOLIO No ${folio.folio}`, boxX + 10, boxY + 31);
 
-      // (REMOVE these lines, they are not needed anymore)
-      // doc.setFont('helvetica', 'bold');
-      // doc.setFontSize(16);
-      // doc.text('IUCH', 250, 18);
-      // doc.setFontSize(8);
-      // doc.setFont('helvetica', 'normal');
-      // doc.text('UN PASO ADELANTE EN EDUCACION', 245, 23);
-  
       // Date and location
       doc.setFontSize(10);
       doc.text('Tuxtla Gutiérrez, Chiapas; a', 10, 55);
       doc.text(`${new Date(folio.fecha_creacion).toLocaleDateString('es-MX', { day: '2-digit', month: 'long', year: 'numeric' }).toUpperCase()}`, 90, 55);
-  
+
       // Table
       doc.setFontSize(10);
       doc.rect(10, 60, 270, 60); // Outer table
       doc.rect(10, 70, 20, 40); // Cantidad
       doc.rect(30, 70, 180, 40); // Description
       doc.rect(210, 70, 70, 40); // Importe
-  
+
       // Table headers
       doc.text('CANTIDAD', 15, 68);
       doc.text('IMPORTE', 235, 68);
-  
+
       // Table content
       doc.text('1', 18, 80);
-      doc.text('PAGO DE COLEGIATURA CORRESPONDIENTE', 32, 80);
-      // Fix: Ensure mes_pago is a string before calling toUpperCase
-      doc.text(
+
+      // Prepare multi-line description, splitting long lines to fit the cell
+      const descLinesRaw = [
+        'PAGO DE COLEGIATURA CORRESPONDIENTE',
         `AL MES DE ${String(folio.mes_pago).toUpperCase()} ${folio.anio_pago}`,
-        32,
-        86
-      );
-      doc.text(`ALUMNO:  ${folio.nombre} ${folio.apellido_paterno} ${folio.apellido_materno}`, 32, 92);
-      doc.text(`NIVEL EDUCATIVO: ${folio.nivel_educativo || ''}`, 32, 98);
-      doc.text('semana', 32, 104);
-      doc.text('fecha de deposito', 32, 110);
-      doc.text('recargos', 32, 116);
-  
-      // Fix: Ensure folio.total is a number before using toFixed
+        `ALUMNO:  ${folio.nombre} ${folio.apellido_paterno} ${folio.apellido_materno}`,
+        `NIVEL EDUCATIVO: ${folio.nivel_educativo || ''}`,
+        'semana',
+        'fecha de deposito',
+        'recargos'
+      ];
+      let descStartY = 80;
+      let descX = 32;
+      let descMaxWidth = 175; // width of the description cell
+      let lineHeight = 6;
+      descLinesRaw.forEach((rawLine) => {
+        const splitLines = doc.splitTextToSize(rawLine, descMaxWidth);
+        splitLines.forEach((line, idx) => {
+          doc.text(line, descX, descStartY);
+          descStartY += lineHeight;
+        });
+      });
+
+      // Importe value
       doc.text(`${Number(folio.total).toFixed(2)}`, 235, 80);
-  
+
       // Total row
       doc.rect(10, 120, 200, 10);
       doc.rect(210, 120, 70, 10);
       doc.text('IMPORTE TOTAL CON LETRA:', 12, 127);
-      // You may want to convert the number to words in Spanish here
       doc.text(`(${folio.total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })} M.N.)`, 90, 127);
       doc.text('TOTAL', 235, 127);
       doc.text(`${Number(folio.total).toFixed(2)}`, 250, 127);
-  
+
       // Footer
       doc.setFontSize(9);
       doc.text('ESTE DOCUMENTO NO ES COMPROBANTE CON VALOR FISCAL', 60, 140);
-  
+
       doc.save('folio_pago.pdf');
     };
-  }; // <-- Only one closing brace here
+  };
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -189,7 +212,6 @@ const UserView = () => {
       <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, backgroundColor: '#2e7d32' }}>
         <Toolbar sx={{ justifyContent: 'space-between' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            {/* Logo */}
             <img
               src="/images/logo.jpeg"
               alt="Instituto Valle de Chiapas Logo"
@@ -219,7 +241,6 @@ const UserView = () => {
             >
               Bienvenido, {user.username && user.username.toUpperCase()}
             </Typography> */}
-            
           </Box>
         </Toolbar>
       </AppBar>
@@ -236,7 +257,7 @@ const UserView = () => {
             borderRight: 'none',
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'space-between', // To push content to top and bottom
+            justifyContent: 'space-between',
           },
         }}
       >
@@ -323,9 +344,9 @@ const UserView = () => {
               fontFamily: "'Montserrat', 'Roboto', 'Arial', sans-serif",
               color: '#2e7d32',
               justifyContent: 'flex-start',
-              whiteSpace: 'nowrap', // Ensure text stays in one line
-              minWidth: 0, // Remove any minWidth that could cause wrapping
-              width: 'auto', // Let the button size to its content
+              whiteSpace: 'nowrap',
+              minWidth: 0,
+              width: 'auto',
             }}
           >
             Cerrar Sesión
@@ -350,12 +371,50 @@ const UserView = () => {
           case 'students':
             return (
               <Box component="main" sx={{ flexGrow: 1, p: 3, pt: 0 }}>
-                {/* Remove or reduce the extra Toolbar/margin here */}
-                {/* <Toolbar /> */}
                 <Box sx={{ mb: 4, mt: 2 }}>
                   {/* Removed Typography components as requested */}
                 </Box>
-                <StudentsView readOnly={false} />
+                <Paper sx={{ p: 3, backgroundColor: 'white', borderRadius: 2 }}>
+                  <TableContainer>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Nombre</TableCell>
+                          <TableCell>Apellido Paterno</TableCell>
+                          <TableCell>Apellido Materno</TableCell>
+                          <TableCell>Fecha de Nacimiento</TableCell>
+                          <TableCell>Nivel Educativo</TableCell>
+                          <TableCell>Teléfono</TableCell>
+                          <TableCell>Correo Electrónico</TableCell>
+                          <TableCell>Tutor</TableCell> {/* New column */}
+                          <TableCell>Número Telefónico Tutor</TableCell> {/* New column */}
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {students && students.length > 0 ? students.map((student) => (
+                          <TableRow key={student.id}>
+                            <TableCell>{student.nombre}</TableCell>
+                            <TableCell>{student.apellido_paterno}</TableCell>
+                            <TableCell>{student.apellido_materno}</TableCell>
+                            <TableCell>{student.fecha_nacimiento ? new Date(student.fecha_nacimiento).toLocaleDateString() : ''}</TableCell>
+                            <TableCell>{student.nivel_educativo}</TableCell>
+                            <TableCell>{student.telefono}</TableCell>
+                            <TableCell>{student.email}</TableCell>
+                            <TableCell>{student.tutor}</TableCell> {/* New cell */}
+                            <TableCell>{student['numero telefonico tutor']}</TableCell> {/* New cell */}
+                            <TableCell align="center">Acciones</TableCell> {/* <-- Restore actions column */}
+                          </TableRow>
+                        )) : (
+                          <TableRow>
+                            <TableCell colSpan={9} align="center">
+                              No hay estudiantes registrados.
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Paper>
               </Box>
             );
           case 'payments':
@@ -403,7 +462,7 @@ const UserView = () => {
                           <TableCell>Nombre</TableCell>
                           <TableCell>Apellido Paterno</TableCell>
                           <TableCell>Apellido Materno</TableCell>
-                          <TableCell align="center">Acciones</TableCell> {/* This is for the print button */}
+                          <TableCell align="center">Acciones</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>

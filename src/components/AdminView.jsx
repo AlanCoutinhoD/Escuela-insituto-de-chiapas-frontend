@@ -298,6 +298,8 @@ const AdminView = () => {
                             <TableCell>Nivel Educativo</TableCell>
                             <TableCell>Teléfono</TableCell>
                             <TableCell>Correo Electrónico</TableCell>
+                            <TableCell>Tutor</TableCell> {/* Nueva columna */}
+                            <TableCell>Número Telefónico Tutor</TableCell> {/* Nueva columna */}
                             <TableCell>Acciones</TableCell>
                           </TableRow>
                         </TableHead>
@@ -313,6 +315,8 @@ const AdminView = () => {
                               <TableCell>{student.nivel_educativo}</TableCell>
                               <TableCell>{student.telefono}</TableCell>
                               <TableCell>{student.email}</TableCell>
+                              <TableCell>{student.tutor}</TableCell> {/* Nueva celda */}
+                              <TableCell>{student.numero_telefonico_tutor}</TableCell> {/* Nueva celda */}
                               <TableCell>
                                 <Box sx={{ display: 'flex', gap: 1 }}>
                                   <IconButton 
@@ -364,7 +368,7 @@ const AdminView = () => {
                       <TableHead>
                         <TableRow>
                           <TableCell>Folio</TableCell>
-                          <TableCell>Fecha de Creación</TableCell>
+                          
                           <TableCell>Mes de Pago</TableCell>
                           <TableCell>Año de Pago</TableCell>
                           <TableCell>Nota</TableCell>
@@ -380,7 +384,7 @@ const AdminView = () => {
                         {folios && folios.length > 0 ? folios.map((folio) => (
                           <TableRow key={folio.id}>
                             <TableCell>{folio.folio}</TableCell>
-                            <TableCell>{new Date(folio.fecha_creacion).toLocaleDateString()}</TableCell>
+                           
                             <TableCell>{folio.mes_pago}</TableCell>
                             <TableCell>{folio.anio_pago}</TableCell>
                             <TableCell>{folio.nota}</TableCell>
