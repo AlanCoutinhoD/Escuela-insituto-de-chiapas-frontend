@@ -207,10 +207,18 @@ const UserView = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f0f4f8' }}>
       <ToastContainer />
-      <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1, backgroundColor: '#2e7d32' }}>
-        <Toolbar sx={{ justifyContent: 'space-between' }}>
+      <AppBar
+        position="fixed"
+        sx={{
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+          backgroundColor: '#2e7d32',
+          height: 100,
+          justifyContent: 'center',
+        }}
+      >
+        <Toolbar sx={{ justifyContent: 'space-between', minHeight: 100 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <img
               src="/images/logo.jpeg"
@@ -258,11 +266,13 @@ const UserView = () => {
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
+            pt: 2,
+            height: '100vh',
           },
         }}
       >
         <Box>
-          <Toolbar />
+          <Toolbar sx={{ minHeight: 100 }} />
           <Box sx={{ overflow: 'auto', mt: 2 }}>
             <List>
               <ListItem 
@@ -366,17 +376,66 @@ const UserView = () => {
         </Box>
       </Drawer>
       {/* Main Content */}
-      {(() => {
-        switch (currentView) {
-          case 'students':
-            return (
-              <Box component="main" sx={{ flexGrow: 1, p: 3, pt: 0 }}>
-                <Box sx={{ mb: 4, mt: 2 }}>
-                  {/* Removed Typography components as requested */}
-                </Box>
-                <Paper sx={{ p: 3, backgroundColor: 'white', borderRadius: 2 }}>
-                  <TableContainer>
-                    <Table>
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          p: { xs: 1, sm: 3 },
+          pt: { xs: 2, sm: 4 },
+          mt: '100px',
+          minHeight: 'calc(100vh - 100px)',
+          overflow: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 3,
+        }}
+      >
+        {(() => {
+          switch (currentView) {
+            case 'students':
+              return (
+                <Paper sx={{ p: { xs: 1, sm: 3 }, backgroundColor: 'white', borderRadius: 2, boxShadow: 3 }}>
+                  <Box sx={{ mb: 3 }}>
+                    <Typography
+                      variant="h5"
+                      sx={{
+                        color: '#2e7d32',
+                        mb: 1,
+                        fontSize: '2rem',
+                        textTransform: 'uppercase',
+                        fontWeight: 900,
+                        fontFamily: "'Montserrat', 'Roboto', 'Arial', sans-serif"
+                      }}
+                    >
+                      Gestión de Estudiantes
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        color: '#666',
+                        fontSize: '1.2rem',
+                        textTransform: 'uppercase',
+                        fontWeight: 700,
+                        fontFamily: "'Montserrat', 'Roboto', 'Arial', sans-serif"
+                      }}
+                    >
+                      Administre los estudiantes del instituto
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: '#888',
+                        fontSize: '1rem',
+                        textTransform: 'uppercase',
+                        fontWeight: 500,
+                        fontFamily: "'Montserrat', 'Roboto', 'Arial', sans-serif"
+                      }}
+                    >
+                      Lista de Estudiantes
+                    </Typography>
+                  </Box>
+                  <TableContainer sx={{ maxHeight: 500 }}>
+                    <Table stickyHeader>
                       <TableHead>
                         <TableRow>
                           <TableCell>Nombre</TableCell>
@@ -386,8 +445,9 @@ const UserView = () => {
                           <TableCell>Nivel Educativo</TableCell>
                           <TableCell>Teléfono</TableCell>
                           <TableCell>Correo Electrónico</TableCell>
-                          <TableCell>Tutor</TableCell> {/* New column */}
-                          <TableCell>Número Telefónico Tutor</TableCell> {/* New column */}
+                          <TableCell>Tutor</TableCell>
+                          <TableCell>Número Telefónico Tutor</TableCell>
+                          <TableCell align="center">Acciones</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
@@ -400,13 +460,13 @@ const UserView = () => {
                             <TableCell>{student.nivel_educativo}</TableCell>
                             <TableCell>{student.telefono}</TableCell>
                             <TableCell>{student.email}</TableCell>
-                            <TableCell>{student.tutor}</TableCell> {/* New cell */}
-                            <TableCell>{student['numero telefonico tutor']}</TableCell> {/* New cell */}
-                            <TableCell align="center">Acciones</TableCell> {/* <-- Restore actions column */}
+                            <TableCell>{student.tutor}</TableCell>
+                            <TableCell>{student['numero telefonico tutor']}</TableCell>
+                            <TableCell align="center">Acciones</TableCell>
                           </TableRow>
                         )) : (
                           <TableRow>
-                            <TableCell colSpan={9} align="center">
+                            <TableCell colSpan={10} align="center">
                               No hay estudiantes registrados.
                             </TableCell>
                           </TableRow>
@@ -415,41 +475,39 @@ const UserView = () => {
                     </Table>
                   </TableContainer>
                 </Paper>
-              </Box>
-            );
-          case 'payments':
-            return (
-              <Box component="main" sx={{ flexGrow: 1, p: 3, pt: 0 }}>
-                <Box sx={{ mb: 4, mt: 2 }}>
-                  <Typography
-                    variant="h5"
-                    sx={{
-                      color: '#2e7d32',
-                      mb: 1,
-                      fontSize: '2rem',
-                      textTransform: 'uppercase',
-                      fontWeight: 900,
-                      fontFamily: "'Montserrat', 'Roboto', 'Arial', sans-serif"
-                    }}
-                  >
-                    Folios de Pago
-                  </Typography>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      color: '#666',
-                      fontSize: '1.2rem',
-                      textTransform: 'uppercase',
-                      fontWeight: 700,
-                      fontFamily: "'Montserrat', 'Roboto', 'Arial', sans-serif"
-                    }}
-                  >
-                    Gestione los folios de pago
-                  </Typography>
-                </Box>
-                <Paper sx={{ p: 3, backgroundColor: 'white', borderRadius: 2 }}>
-                  <TableContainer>
-                    <Table>
+              );
+            case 'payments':
+              return (
+                <Paper sx={{ p: { xs: 1, sm: 3 }, backgroundColor: 'white', borderRadius: 2, boxShadow: 3 }}>
+                  <Box sx={{ mb: 3 }}>
+                    <Typography
+                      variant="h5"
+                      sx={{
+                        color: '#2e7d32',
+                        mb: 1,
+                        fontSize: '2rem',
+                        textTransform: 'uppercase',
+                        fontWeight: 900,
+                        fontFamily: "'Montserrat', 'Roboto', 'Arial', sans-serif"
+                      }}
+                    >
+                      Folios de Pago
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        color: '#666',
+                        fontSize: '1.2rem',
+                        textTransform: 'uppercase',
+                        fontWeight: 700,
+                        fontFamily: "'Montserrat', 'Roboto', 'Arial', sans-serif"
+                      }}
+                    >
+                      Gestione los folios de pago
+                    </Typography>
+                  </Box>
+                  <TableContainer sx={{ maxHeight: 500 }}>
+                    <Table stickyHeader>
                       <TableHead>
                         <TableRow>
                           <TableCell>Folio</TableCell>
@@ -498,12 +556,12 @@ const UserView = () => {
                     </Table>
                   </TableContainer>
                 </Paper>
-              </Box>
-            );
-          default:
-            return null;
-        }
-      })()}
+              );
+            default:
+              return null;
+          }
+        })()}
+      </Box>
     </Box>
   );
 };
