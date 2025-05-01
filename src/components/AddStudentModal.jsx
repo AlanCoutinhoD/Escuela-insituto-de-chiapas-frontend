@@ -27,7 +27,7 @@ const AddStudentModal = ({ open, onClose }) => {
     telefono: '',
     email: '',
     tutor: '', // <-- new field
-    'numero telefonico tutor': '', // <-- new field
+    numero_telefonico_tutor: '' // <-- new field
   });
 
   const handleChange = (e) => {
@@ -175,8 +175,8 @@ const AddStudentModal = ({ open, onClose }) => {
           <TextField
             fullWidth
             label="Número Telefónico Tutor"
-            name="numero telefonico tutor"
-            value={formData['numero telefonico tutor']}
+            name="numero_telefonico_tutor"
+            value={formData.numero_telefonico_tutor}
             onChange={handleChange}
             placeholder="(961) 123-4567"
             sx={{ mb: 2 }}
