@@ -16,12 +16,20 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  TextField,
+  InputAdornment,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import ReceiptIcon from '@mui/icons-material/Receipt';
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
 import axios from 'axios';
 
 // Importar componentes modales
@@ -38,15 +46,26 @@ const StudentsView = () => {
   const [openPaymentModal, setOpenPaymentModal] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [studentToDelete, setStudentToDelete] = useState(null);
+  
+  // Estados para el buscador
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchType, setSearchType] = useState('nombre');
+  const [isSearching, setIsSearching] = useState(false);
 
   // Handlers para modales
   const handleOpenModal = () => {
     setOpenModal(true);
   };
 
-  const handleCloseModal = () => {
+  const handleCloseModal = (wasAdded = false) => {
     setOpenModal(false);
-    fetchStudents();
+    if (wasAdded) {
+      fetchStudents();
+      toast.success('Estudiante agregado correctamente', {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    }
   };
 
   const handleOpenEditModal = (student) => {
@@ -71,9 +90,16 @@ const StudentsView = () => {
     setOpenPaymentModal(true);
   };
 
-  const handleClosePaymentModal = () => {
+  const handleClosePaymentModal = (wasCreated = false) => {
     setOpenPaymentModal(false);
     setSelectedStudent(null);
+    if (wasCreated) {
+      fetchStudents();
+      toast.success('Folio de pago generado correctamente', {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    }
   };
 
   const handleOpenDeleteDialog = (student) => {
@@ -111,6 +137,48 @@ const StudentsView = () => {
         autoClose: 3000,
       });
     }
+  };
+
+  // Función para buscar estudiantes
+  const handleSearch = async () => {
+    if (!searchTerm.trim()) {
+      fetchStudents();
+      return;
+    }
+    
+    setIsSearching(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(
+        `https://escuelaback-production.up.railway.app/api/students/search?${searchType}=${encodeURIComponent(searchTerm)}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+      setStudents(response.data);
+      if (response.data.length === 0) {
+        toast.info('No se encontraron estudiantes con ese criterio', {
+          position: "top-right",
+          autoClose: 3000,
+        });
+      }
+    } catch (error) {
+      toast.error('Error al buscar estudiantes', {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      console.error('Error al buscar estudiantes:', error);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // Limpiar búsqueda
+  const handleClearSearch = () => {
+    setSearchTerm('');
+    fetchStudents();
   };
 
   // Fetch students from backend
@@ -180,6 +248,59 @@ const StudentsView = () => {
             Lista de Estudiantes
           </Typography>
         </Box>
+
+        {/* Buscador de estudiantes */}
+        <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
+          <FormControl sx={{ minWidth: 200 }}>
+            <InputLabel id="search-type-label">Buscar por</InputLabel>
+            <Select
+              labelId="search-type-label"
+              value={searchType}
+              onChange={(e) => setSearchType(e.target.value)}
+              label="Buscar por"
+              size="small"
+            >
+              <MenuItem value="nombre">Nombre</MenuItem>
+              <MenuItem value="apellido_paterno">Apellido Paterno</MenuItem>
+              <MenuItem value="apellido_materno">Apellido Materno</MenuItem>
+              <MenuItem value="nivel_educativo">Nivel Educativo</MenuItem>
+              <MenuItem value="email">Correo Electrónico</MenuItem>
+            </Select>
+          </FormControl>
+          <TextField
+            label="Buscar estudiante"
+            variant="outlined"
+            size="small"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+            sx={{ flexGrow: 1 }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  {searchTerm && (
+                    <IconButton
+                      onClick={handleClearSearch}
+                      edge="end"
+                      size="small"
+                    >
+                      <ClearIcon />
+                    </IconButton>
+                  )}
+                  <IconButton
+                    onClick={handleSearch}
+                    edge="end"
+                    size="small"
+                    disabled={isSearching}
+                  >
+                    <SearchIcon />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Box>
+
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
           <Button
             variant="contained"
@@ -255,7 +376,7 @@ const StudentsView = () => {
               )) : (
                 <TableRow>
                   <TableCell colSpan={10} align="center">
-                    No hay estudiantes registrados.
+                    {isSearching ? 'Buscando estudiantes...' : 'No hay estudiantes registrados.'}
                   </TableCell>
                 </TableRow>
               )}
@@ -265,19 +386,28 @@ const StudentsView = () => {
       </Paper>
 
       {/* Modales */}
-      <AddStudentModal open={openModal} handleClose={handleCloseModal} />
+      {openModal && (
+        <AddStudentModal 
+          open={openModal} 
+          onClose={handleCloseModal} 
+        />
+      )}
       
-      <EditStudentModal 
-        open={openEditModal} 
-        handleClose={handleCloseEditModal} 
-        student={selectedStudentForEdit} 
-      />
+      {openEditModal && selectedStudentForEdit && (
+        <EditStudentModal 
+          open={openEditModal} 
+          onClose={handleCloseEditModal} 
+          student={selectedStudentForEdit} 
+        />
+      )}
       
-      <CreatePaymentModal 
-        open={openPaymentModal} 
-        handleClose={handleClosePaymentModal} 
-        student={selectedStudent} 
-      />
+      {openPaymentModal && selectedStudent && (
+        <CreatePaymentModal 
+          open={openPaymentModal} 
+          onClose={handleClosePaymentModal} 
+          student={selectedStudent} 
+        />
+      )}
 
       {/* Diálogo de confirmación para eliminar */}
       <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>

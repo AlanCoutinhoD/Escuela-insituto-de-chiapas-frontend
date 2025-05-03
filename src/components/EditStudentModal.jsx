@@ -23,9 +23,11 @@ const EditStudentModal = ({ open, onClose, student }) => {
     nivel_educativo: '',
     telefono: '',
     email: '',
-    tutor: '', // <-- new field
-    numero_telefonico_tutor: '', // <-- new field
+    tutor: '',
+    numero_telefonico_tutor: '',
   });
+  
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (student) {
@@ -38,7 +40,7 @@ const EditStudentModal = ({ open, onClose, student }) => {
         telefono: student.telefono || '',
         email: student.email || '',
         tutor: student.tutor || '',
-        numero_telefonico_tutor: student.numero_telefonico_tutor || '', // <-- updated here
+        numero_telefonico_tutor: student.numero_telefonico_tutor || '',
       });
     }
   }, [student]);
@@ -52,6 +54,9 @@ const EditStudentModal = ({ open, onClose, student }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem('token');
       const response = await axios.put(
@@ -63,9 +68,9 @@ const EditStudentModal = ({ open, onClose, student }) => {
           }
         }
       );
-
+  
       if (response.status === 200) {
-        onClose(true); // Let AdminView handle the success notification
+        onClose(true); // Indicar éxito al cerrar
       }
     } catch (error) {
       console.error('Error updating student:', error);
@@ -73,6 +78,14 @@ const EditStudentModal = ({ open, onClose, student }) => {
         position: "top-right",
         autoClose: 3000,
       });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleClose = () => {
+    if (!isSubmitting) {
+      onClose(false);
     }
   };
 
@@ -85,117 +98,131 @@ const EditStudentModal = ({ open, onClose, student }) => {
   ];
 
   return (
-    <Dialog open={open} onClose={() => onClose(false)} maxWidth="sm" fullWidth>
+    <Dialog 
+      open={open} 
+      onClose={handleClose} 
+      maxWidth="sm" 
+      fullWidth
+    >
       <DialogTitle>
         <Typography component="div" variant="h6">Editar Estudiante</Typography>
         <IconButton
-          onClick={() => onClose(false)}
+          onClick={handleClose}
           sx={{
             position: 'absolute',
             right: 8,
             top: 8,
             color: '#666',
           }}
+          disabled={isSubmitting}
         >
           <CloseIcon />
         </IconButton>
       </DialogTitle>
       <DialogContent>
-        <TextField
-          fullWidth
-          label="Nombre"
-          name="nombre"
-          value={formData.nombre}
-          onChange={handleChange}
-          sx={{ mt: 2, mb: 2 }}
-        />
-        <TextField
-          fullWidth
-          label="Apellido Paterno"
-          name="apellido_paterno"
-          value={formData.apellido_paterno}
-          onChange={handleChange}
-          sx={{ mb: 2 }}
-        />
-        <TextField
-          fullWidth
-          label="Apellido Materno"
-          name="apellido_materno"
-          value={formData.apellido_materno}
-          onChange={handleChange}
-          sx={{ mb: 2 }}
-        />
-        <TextField
-          fullWidth
-          label="Fecha de Nacimiento"
-          name="fecha_nacimiento"
-          type="date"
-          value={formData.fecha_nacimiento}
-          onChange={handleChange}
-          InputLabelProps={{ shrink: true }}
-          sx={{ mb: 2 }}
-        />
-        <TextField
-          select
-          fullWidth
-          label="Nivel Educativo"
-          name="nivel_educativo"
-          value={formData.nivel_educativo}
-          onChange={handleChange}
-          sx={{ mb: 2 }}
-        >
-          {nivelesEducativos.map((nivel) => (
-            <MenuItem key={nivel} value={nivel}>
-              {nivel}
-            </MenuItem>
-          ))}
-        </TextField>
-        <TextField
-          fullWidth
-          label="Teléfono"
-          name="telefono"
-          value={formData.telefono}
-          onChange={handleChange}
-          sx={{ mb: 2 }}
-        />
-        <TextField
-          fullWidth
-          label="Correo Electrónico"
-          name="email"
-          type="email"
-          value={formData.email}
-          onChange={handleChange}
-        />
-        <TextField
-          fullWidth
-          label="Tutor"
-          name="tutor"
-          value={formData.tutor}
-          onChange={handleChange}
-          sx={{ mb: 2 }}
-        />
-        <TextField
-          fullWidth
-          label="Número Telefónico Tutor"
-          name="numero_telefonico_tutor" // <-- updated here
-          value={formData.numero_telefonico_tutor} // <-- updated here
-          onChange={handleChange}
-          sx={{ mb: 2 }}
-        />
+        <form id="edit-student-form" onSubmit={handleSubmit}>
+          <TextField
+            fullWidth
+            label="Nombre"
+            name="nombre"
+            value={formData.nombre}
+            onChange={handleChange}
+            sx={{ mt: 2, mb: 2 }}
+          />
+          <TextField
+            fullWidth
+            label="Apellido Paterno"
+            name="apellido_paterno"
+            value={formData.apellido_paterno}
+            onChange={handleChange}
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            fullWidth
+            label="Apellido Materno"
+            name="apellido_materno"
+            value={formData.apellido_materno}
+            onChange={handleChange}
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            fullWidth
+            label="Fecha de Nacimiento"
+            name="fecha_nacimiento"
+            type="date"
+            value={formData.fecha_nacimiento}
+            onChange={handleChange}
+            InputLabelProps={{ shrink: true }}
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            select
+            fullWidth
+            label="Nivel Educativo"
+            name="nivel_educativo"
+            value={formData.nivel_educativo}
+            onChange={handleChange}
+            sx={{ mb: 2 }}
+          >
+            {nivelesEducativos.map((nivel) => (
+              <MenuItem key={nivel} value={nivel}>
+                {nivel}
+              </MenuItem>
+            ))}
+          </TextField>
+          <TextField
+            fullWidth
+            label="Teléfono"
+            name="telefono"
+            value={formData.telefono}
+            onChange={handleChange}
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            fullWidth
+            label="Correo Electrónico"
+            name="email"
+            type="email"
+            value={formData.email}
+            onChange={handleChange}
+          />
+          <TextField
+            fullWidth
+            label="Tutor"
+            name="tutor"
+            value={formData.tutor}
+            onChange={handleChange}
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            fullWidth
+            label="Número Telefónico Tutor"
+            name="numero_telefonico_tutor" // <-- updated here
+            value={formData.numero_telefonico_tutor} // <-- updated here
+            onChange={handleChange}
+            sx={{ mb: 2 }}
+          />
+        </form>
       </DialogContent>
       <DialogActions sx={{ p: 2 }}>
-        <Button onClick={() => onClose(false)} sx={{ color: '#666' }}>
+        <Button 
+          onClick={handleClose} 
+          sx={{ color: '#666' }}
+          disabled={isSubmitting}
+        >
           Cancelar
         </Button>
         <Button
-          onClick={handleSubmit}
+          type="submit"
+          form="edit-student-form"
           variant="contained"
           sx={{
             backgroundColor: '#2e7d32',
             '&:hover': { backgroundColor: '#1b5e20' }
           }}
+          disabled={isSubmitting}
         >
-          Guardar Cambios
+          {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
         </Button>
       </DialogActions>
     </Dialog>

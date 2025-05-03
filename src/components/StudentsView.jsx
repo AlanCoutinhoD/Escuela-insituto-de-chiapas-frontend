@@ -92,13 +92,11 @@ const StudentsView = ({ readOnly }) => {
   };
 
   const handleCloseAddModal = (wasAdded = false) => {
+    console.log('Cerrando modal de agregar estudiante', wasAdded);
     setOpenAddModal(false);
     if (wasAdded) {
+      // Refresh the student list if a student was added
       fetchStudents();
-      toast.success('Estudiante agregado correctamente', {
-        position: "top-right",
-        autoClose: 3000,
-      });
     }
   };
 
@@ -273,10 +271,6 @@ const StudentsView = ({ readOnly }) => {
       </Paper>
 
       {/* Modals */}
-      <AddStudentModal
-        open={openAddModal}
-        onClose={handleCloseAddModal}
-      />
       <EditStudentModal
         open={openEditModal}
         onClose={handleCloseEditModal}
@@ -286,6 +280,10 @@ const StudentsView = ({ readOnly }) => {
         open={openPaymentModal}
         onClose={handleClosePaymentModal}
         student={selectedStudent}
+      />
+      <AddStudentModal
+        open={openAddModal}
+        onClose={handleCloseAddModal}
       />
     </Box>
   );

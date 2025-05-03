@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -18,7 +18,7 @@ import { toast } from 'react-toastify';
 import axios from 'axios';
 
 const AddStudentModal = ({ open, onClose }) => {
-  const [formData, setFormData] = useState({
+  const initialFormState = {
     nombre: '',
     apellido_paterno: '',
     apellido_materno: '',
@@ -26,9 +26,20 @@ const AddStudentModal = ({ open, onClose }) => {
     nivel_educativo: '',
     telefono: '',
     email: '',
-    tutor: '', // <-- new field
-    numero_telefonico_tutor: '' // <-- new field
-  });
+    tutor: '',
+    numero_telefonico_tutor: ''
+  };
+
+  const [formData, setFormData] = useState(initialFormState);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Reiniciar el formulario cuando se abre el modal
+  useEffect(() => {
+    if (open) {
+      setFormData(initialFormState);
+      setIsSubmitting(false);
+    }
+  }, [open]);
 
   const handleChange = (e) => {
     setFormData({
@@ -39,6 +50,9 @@ const AddStudentModal = ({ open, onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
@@ -50,34 +64,55 @@ const AddStudentModal = ({ open, onClose }) => {
           }
         }
       );
-
+  
       if (response.status === 201) {
         toast.success('Estudiante agregado correctamente', {
           position: "top-right",
           autoClose: 3000,
         });
-        onClose();
+        // Reiniciar el formulario
+        setFormData(initialFormState);
+        // Cerrar el modal inmediatamente después de éxito
+        onClose(true);
       }
     } catch (error) {
+      console.error('Error al agregar estudiante:', error);
       toast.error('Error al agregar estudiante', {
         position: "top-right",
         autoClose: 3000,
       });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Función para manejar el cierre del modal
+  const handleClose = () => {
+    if (!isSubmitting) {
+      setFormData(initialFormState);
+      onClose(false);
     }
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog 
+      open={open} 
+      onClose={handleClose}
+      maxWidth="sm" 
+      fullWidth
+    >
       <DialogTitle sx={{ m: 0, p: 2, backgroundColor: 'white' }}>
-        <Typography variant="h6">Agregar Nuevo Estudiante</Typography>
+        Agregar Nuevo Estudiante
         <IconButton
-          onClick={onClose}
+          aria-label="close"
+          onClick={handleClose}
           sx={{
             position: 'absolute',
             right: 8,
             top: 8,
             color: '#666',
           }}
+          disabled={isSubmitting}
         >
           <CloseIcon />
         </IconButton>
@@ -86,7 +121,7 @@ const AddStudentModal = ({ open, onClose }) => {
         <Typography variant="body1" color="textSecondary" sx={{ mb: 3 }}>
           Complete el formulario para registrar un nuevo estudiante en el sistema.
         </Typography>
-        <form onSubmit={handleSubmit}>
+        <form id="add-student-form" onSubmit={handleSubmit}>
           <TextField
             fullWidth
             label="Nombre"
@@ -96,6 +131,7 @@ const AddStudentModal = ({ open, onClose }) => {
             placeholder="Nombre del estudiante"
             sx={{ mb: 2 }}
             required
+            disabled={isSubmitting}
           />
           <TextField
             fullWidth
@@ -106,6 +142,7 @@ const AddStudentModal = ({ open, onClose }) => {
             placeholder="Apellido paterno"
             sx={{ mb: 2 }}
             required
+            disabled={isSubmitting}
           />
           <TextField
             fullWidth
@@ -116,6 +153,7 @@ const AddStudentModal = ({ open, onClose }) => {
             placeholder="Apellido materno"
             sx={{ mb: 2 }}
             required
+            disabled={isSubmitting}
           />
           <TextField
             fullWidth
@@ -127,8 +165,9 @@ const AddStudentModal = ({ open, onClose }) => {
             InputLabelProps={{ shrink: true }}
             sx={{ mb: 2 }}
             required
+            disabled={isSubmitting}
           />
-          <FormControl fullWidth sx={{ mb: 2 }}>
+          <FormControl fullWidth sx={{ mb: 2 }} disabled={isSubmitting}>
             <InputLabel>Nivel Educativo</InputLabel>
             <Select
               name="nivel_educativo"
@@ -152,6 +191,7 @@ const AddStudentModal = ({ open, onClose }) => {
             placeholder="correo@ejemplo.com"
             sx={{ mb: 2 }}
             required
+            disabled={isSubmitting}
           />
           <TextField
             fullWidth
@@ -159,43 +199,54 @@ const AddStudentModal = ({ open, onClose }) => {
             name="telefono"
             value={formData.telefono}
             onChange={handleChange}
-            placeholder="(961) 123-4567"
+            placeholder="Número telefónico"
             sx={{ mb: 2 }}
             required
+            disabled={isSubmitting}
           />
           <TextField
             fullWidth
-            label="Tutor"
+            label="Nombre del Tutor"
             name="tutor"
             value={formData.tutor}
             onChange={handleChange}
-            placeholder="Nombre del tutor"
+            placeholder="Nombre completo del tutor"
             sx={{ mb: 2 }}
+            required
+            disabled={isSubmitting}
           />
           <TextField
             fullWidth
-            label="Número Telefónico Tutor"
+            label="Teléfono del Tutor"
             name="numero_telefonico_tutor"
             value={formData.numero_telefonico_tutor}
             onChange={handleChange}
-            placeholder="(961) 123-4567"
+            placeholder="Número telefónico del tutor"
             sx={{ mb: 2 }}
+            required
+            disabled={isSubmitting}
           />
         </form>
       </DialogContent>
-      <DialogActions sx={{ p: 3 }}>
-        <Button onClick={onClose} sx={{ color: '#666' }}>
+      <DialogActions sx={{ p: 2 }}>
+        <Button 
+          onClick={handleClose} 
+          sx={{ color: '#666' }}
+          disabled={isSubmitting}
+        >
           Cancelar
         </Button>
         <Button
-          onClick={handleSubmit}
+          type="submit"
+          form="add-student-form"
           variant="contained"
           sx={{
             backgroundColor: '#2e7d32',
             '&:hover': { backgroundColor: '#1b5e20' }
           }}
+          disabled={isSubmitting}
         >
-          Guardar
+          {isSubmitting ? 'Guardando...' : 'Guardar Estudiante'}
         </Button>
       </DialogActions>
     </Dialog>

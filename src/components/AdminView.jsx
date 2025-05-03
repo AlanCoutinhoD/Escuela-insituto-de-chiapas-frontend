@@ -123,7 +123,7 @@ const AdminView = () => {
 
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Toolbar />
-        {currentView === 'students' && <StudentsView />}
+        {currentView === 'students' && <StudentsView readOnly={false} />}
         {currentView === 'users' && <UsersView />}
         {currentView === 'payments' && <PaymentsView />}
       </Box>

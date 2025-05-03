@@ -26,6 +26,7 @@ const CreatePaymentModal = ({ open, onClose, student }) => {
     total: '',
   });
   const [selectedDate, setSelectedDate] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -34,9 +35,14 @@ const CreatePaymentModal = ({ open, onClose, student }) => {
     });
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    if (e) e.preventDefault();
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
     const mes_pago = selectedDate ? dayjs(selectedDate).month() + 1 : null;
     const anio_pago = selectedDate ? dayjs(selectedDate).year() : null;
+    
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
@@ -61,13 +67,28 @@ const CreatePaymentModal = ({ open, onClose, student }) => {
           position: "top-right",
           autoClose: 3000,
         });
-        onClose();
+        handleClose(true);
       }
     } catch (error) {
       toast.error('Error al generar el folio', {
         position: "top-right",
         autoClose: 3000,
       });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleClose = (success = false) => {
+    if (!isSubmitting) {
+      // Reiniciar el formulario
+      setFormData({
+        nota: '',
+        abono: '',
+        total: '',
+      });
+      setSelectedDate(null);
+      onClose(success);
     }
   };
 
@@ -112,7 +133,7 @@ const CreatePaymentModal = ({ open, onClose, student }) => {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={() => handleClose(false)} maxWidth="sm" fullWidth>
       <DialogTitle sx={{ textAlign: 'center', pb: 1 }}>
         {/* Logo at the top of the modal */}
         <img
@@ -122,72 +143,84 @@ const CreatePaymentModal = ({ open, onClose, student }) => {
         />
         <Typography variant="h6">Generar Folio de Pago</Typography>
         <IconButton
-          onClick={onClose}
+          onClick={() => handleClose(false)}
           sx={{
             position: 'absolute',
             right: 8,
             top: 8,
             color: '#666',
           }}
+          disabled={isSubmitting}
         >
           <CloseIcon />
         </IconButton>
       </DialogTitle>
       <DialogContent>
-        <Typography variant="subtitle1" sx={{ mb: 2 }}>
-          Estudiante: {student?.nombre} {student?.apellido_paterno} {student?.apellido_materno}
-        </Typography>
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <DatePicker
-            label="Mes y Año de Pago"
-            views={['year', 'month']}
-            value={selectedDate}
-            onChange={setSelectedDate}
-            renderInput={(params) => <TextField {...params} fullWidth sx={{ mb: 2 }} />}
+        <form id="payment-form" onSubmit={handleSubmit}>
+          <Typography variant="subtitle1" sx={{ mb: 2 }}>
+            Estudiante: {student?.nombre} {student?.apellido_paterno} {student?.apellido_materno}
+          </Typography>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DatePicker
+              label="Mes y Año de Pago"
+              views={['year', 'month']}
+              value={selectedDate}
+              onChange={setSelectedDate}
+              renderInput={(params) => <TextField {...params} fullWidth sx={{ mb: 2 }} />}
+            />
+          </LocalizationProvider>
+          
+          {/* Add your other form fields here */}
+          <TextField
+            fullWidth
+            label="Nota"
+            name="nota"
+            value={formData.nota}
+            onChange={handleChange}
+            placeholder="Detalles del pago"
+            sx={{ mb: 2 }}
           />
-        </LocalizationProvider>
-        <TextField
-          fullWidth
-          label="Nota"
-          name="nota"
-          value={formData.nota}
-          onChange={handleChange}
-          sx={{ mb: 2 }}
-          required
-        />
-        <TextField
-          fullWidth
-          label="Abono"
-          name="abono"
-          type="number"
-          value={formData.abono}
-          onChange={handleChange}
-          sx={{ mb: 2 }}
-          required
-        />
-        <TextField
-          fullWidth
-          label="Total"
-          name="total"
-          type="number"
-          value={formData.total}
-          onChange={handleChange}
-          required
-        />
+          <TextField
+            fullWidth
+            label="Abono"
+            name="abono"
+            type="number"
+            value={formData.abono}
+            onChange={handleChange}
+            placeholder="Cantidad abonada"
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            fullWidth
+            label="Total"
+            name="total"
+            type="number"
+            value={formData.total}
+            onChange={handleChange}
+            placeholder="Monto total"
+            sx={{ mb: 2 }}
+          />
+        </form> {/* Add this closing tag */}
       </DialogContent>
       <DialogActions sx={{ p: 2 }}>
-        <Button onClick={onClose} sx={{ color: '#666' }}>
+        <Button 
+          onClick={() => handleClose(false)} 
+          sx={{ color: '#666' }}
+          disabled={isSubmitting}
+        >
           Cancelar
         </Button>
         <Button
-          onClick={handleSubmit}
+          type="submit"
+          form="payment-form"
           variant="contained"
           sx={{
             backgroundColor: '#2e7d32',
             '&:hover': { backgroundColor: '#1b5e20' }
           }}
+          disabled={isSubmitting}
         >
-          Generar Folio
+          {isSubmitting ? 'Generando...' : 'Generar Folio'}
         </Button>
       </DialogActions>
     </Dialog>
