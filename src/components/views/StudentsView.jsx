@@ -117,7 +117,7 @@ const StudentsView = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.delete(
-        `${process.env.REACT_APP_API_URL}/students/delete/${studentToDelete.id}`,
+        `https://escuelaback-production.up.railway.app/api/students/delete/${studentToDelete.id}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -186,7 +186,7 @@ const StudentsView = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}/students/all`,
+        `https://escuelaback-production.up.railway.app/api/students/all`,
         {
           headers: {
             'Authorization': `Bearer ${token}`

@@ -49,7 +49,7 @@ const UserView = () => {
       try {
         const token = localStorage.getItem('token');
         const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/payments/all`,
+          `https://escuelaback-production.up.railway.app/api/payments/all`,
           {
             headers: {
               'Authorization': `Bearer ${token}`
@@ -70,7 +70,7 @@ const UserView = () => {
       try {
         const token = localStorage.getItem('token');
         const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/students/all`,
+          `https://escuelaback-production.up.railway.app/api/students/all`,
           {
             headers: {
               'Authorization': `Bearer ${token}`

@@ -26,7 +26,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/users/login`, credentials);
+      const response = await axios.post(`https://escuelaback-production.up.railway.app/api/users/login`, credentials);
       
       if (response.status === 200) {
         const { token, user } = response.data;

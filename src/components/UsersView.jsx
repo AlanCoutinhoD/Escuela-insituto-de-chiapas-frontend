@@ -22,7 +22,7 @@ const UsersView = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}/users/all`,
+        `https://escuelaback-production.up.railway.app/api/users/all`,
         {
           headers: {
             'Authorization': `Bearer ${token}`

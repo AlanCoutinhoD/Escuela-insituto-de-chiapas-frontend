@@ -60,7 +60,7 @@ const EditStudentModal = ({ open, onClose, student }) => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.put(
-        `${process.env.REACT_APP_API_URL}/students/update/${student.id}`,
+        `https://escuelaback-production.up.railway.app/api/students/update/${student.id}`,
         formData,
         {
           headers: {

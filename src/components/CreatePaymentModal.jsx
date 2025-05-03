@@ -46,7 +46,7 @@ const CreatePaymentModal = ({ open, onClose, student }) => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/payments/create`,
+        `https://escuelaback-production.up.railway.app/api/payments/create`,
         {
           mes_pago,
           anio_pago,

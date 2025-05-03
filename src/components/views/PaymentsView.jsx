@@ -24,7 +24,7 @@ const PaymentsView = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}/payments/all`,
+        `https://escuelaback-production.up.railway.app/api/payments/all`,
         {
           headers: {
             'Authorization': `Bearer ${token}`

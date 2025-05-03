@@ -40,7 +40,7 @@ const StudentsView = ({ readOnly }) => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}/students/all`,
+        `https://escuelaback-production.up.railway.app/api/students/all`,
         {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -116,7 +116,7 @@ const StudentsView = ({ readOnly }) => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}/students/search?${searchType}=${encodeURIComponent(search)}`,
+        `https://escuelaback-production.up.railway.app/api/students/search?${searchType}=${encodeURIComponent(search)}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`

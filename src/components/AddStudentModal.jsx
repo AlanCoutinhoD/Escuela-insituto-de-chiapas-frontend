@@ -56,7 +56,7 @@ const AddStudentModal = ({ open, onClose }) => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/students/create`,
+        `https://escuelaback-production.up.railway.app/api/students/create`,
         formData,
         {
           headers: {
