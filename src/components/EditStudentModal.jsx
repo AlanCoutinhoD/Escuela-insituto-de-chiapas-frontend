@@ -94,7 +94,10 @@ const EditStudentModal = ({ open, onClose, student }) => {
     'Primaria',
     'Secundaria',
     'Preparatoria',
-    'Universidad'
+    'Universidad',
+    'Examen',
+    'Curso belleza',
+    'Constancia'
   ];
 
   return (

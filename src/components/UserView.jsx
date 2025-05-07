@@ -18,7 +18,12 @@ import {
   TableRow,
   TableCell,
   TableBody,
-  IconButton
+  IconButton,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Grid
 } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import PeopleIcon from '@mui/icons-material/People';
@@ -26,8 +31,8 @@ import ReceiptIcon from '@mui/icons-material/Receipt';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import PaymentsView from './PaymentsView';
-import StudentsView from './StudentsView';
+import PaymentsView from './views/PaymentsView';
+import StudentsView from './views/StudentsView';
 import axios from 'axios';
 import PrintIcon from '@mui/icons-material/Print';
 import CreatePaymentModal from './CreatePaymentModal';
@@ -390,177 +395,8 @@ const UserView = () => {
           gap: 3,
         }}
       >
-        {(() => {
-          switch (currentView) {
-            case 'students':
-              return (
-                <Paper sx={{ p: { xs: 1, sm: 3 }, backgroundColor: 'white', borderRadius: 2, boxShadow: 3 }}>
-                  <Box sx={{ mb: 3 }}>
-                    <Typography
-                      variant="h5"
-                      sx={{
-                        color: '#2e7d32',
-                        mb: 1,
-                        fontSize: '2rem',
-                        textTransform: 'uppercase',
-                        fontWeight: 900,
-                        fontFamily: "'Montserrat', 'Roboto', 'Arial', sans-serif"
-                      }}
-                    >
-                      Gestión de Estudiantes
-                    </Typography>
-                    <Typography
-                      variant="body1"
-                      sx={{
-                        color: '#666',
-                        fontSize: '1.2rem',
-                        textTransform: 'uppercase',
-                        fontWeight: 700,
-                        fontFamily: "'Montserrat', 'Roboto', 'Arial', sans-serif"
-                      }}
-                    >
-                      Administre los estudiantes del instituto
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: '#888',
-                        fontSize: '1rem',
-                        textTransform: 'uppercase',
-                        fontWeight: 500,
-                        fontFamily: "'Montserrat', 'Roboto', 'Arial', sans-serif"
-                      }}
-                    >
-                      Lista de Estudiantes
-                    </Typography>
-                  </Box>
-                  <TableContainer sx={{ maxHeight: 500 }}>
-                    <Table stickyHeader>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Nombre</TableCell>
-                          <TableCell>Apellido Paterno</TableCell>
-                          <TableCell>Apellido Materno</TableCell>
-                          <TableCell>Fecha de Nacimiento</TableCell>
-                          <TableCell>Nivel Educativo</TableCell>
-                          <TableCell>Teléfono</TableCell>
-                          <TableCell>Correo Electrónico</TableCell>
-                          <TableCell>Tutor</TableCell>
-                          <TableCell>Número Telefónico Tutor</TableCell>
-                          <TableCell align="center">Acciones</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {students && students.length > 0 ? students.map((student) => (
-                          <TableRow key={student.id}>
-                            <TableCell>{student.nombre}</TableCell>
-                            <TableCell>{student.apellido_paterno}</TableCell>
-                            <TableCell>{student.apellido_materno}</TableCell>
-                            <TableCell>{student.fecha_nacimiento ? new Date(student.fecha_nacimiento).toLocaleDateString() : ''}</TableCell>
-                            <TableCell>{student.nivel_educativo}</TableCell>
-                            <TableCell>{student.telefono}</TableCell>
-                            <TableCell>{student.email}</TableCell>
-                            <TableCell>{student.tutor}</TableCell>
-                            <TableCell>{student['numero telefonico tutor']}</TableCell>
-                            <TableCell align="center">Acciones</TableCell>
-                          </TableRow>
-                        )) : (
-                          <TableRow>
-                            <TableCell colSpan={10} align="center">
-                              No hay estudiantes registrados.
-                            </TableCell>
-                          </TableRow>
-                        )}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </Paper>
-              );
-            case 'payments':
-              return (
-                <Paper sx={{ p: { xs: 1, sm: 3 }, backgroundColor: 'white', borderRadius: 2, boxShadow: 3 }}>
-                  <Box sx={{ mb: 3 }}>
-                    <Typography
-                      variant="h5"
-                      sx={{
-                        color: '#2e7d32',
-                        mb: 1,
-                        fontSize: '2rem',
-                        textTransform: 'uppercase',
-                        fontWeight: 900,
-                        fontFamily: "'Montserrat', 'Roboto', 'Arial', sans-serif"
-                      }}
-                    >
-                      Folios de Pago
-                    </Typography>
-                    <Typography
-                      variant="body1"
-                      sx={{
-                        color: '#666',
-                        fontSize: '1.2rem',
-                        textTransform: 'uppercase',
-                        fontWeight: 700,
-                        fontFamily: "'Montserrat', 'Roboto', 'Arial', sans-serif"
-                      }}
-                    >
-                      Gestione los folios de pago
-                    </Typography>
-                  </Box>
-                  <TableContainer sx={{ maxHeight: 500 }}>
-                    <Table stickyHeader>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Folio</TableCell>
-                          <TableCell>Fecha de Creación</TableCell>
-                          <TableCell>Mes de Pago</TableCell>
-                          <TableCell>Año de Pago</TableCell>
-                          <TableCell>Nota</TableCell>
-                          <TableCell>Abono</TableCell>
-                          <TableCell>Total</TableCell>
-                          <TableCell>Nombre</TableCell>
-                          <TableCell>Apellido Paterno</TableCell>
-                          <TableCell>Apellido Materno</TableCell>
-                          <TableCell align="center">Acciones</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {folios && folios.length > 0 ? folios.map((folio) => (
-                          <TableRow key={folio.id}>
-                            <TableCell>{folio.folio}</TableCell>
-                            <TableCell>{new Date(folio.fecha_creacion).toLocaleDateString()}</TableCell>
-                            <TableCell>{folio.mes_pago}</TableCell>
-                            <TableCell>{folio.anio_pago}</TableCell>
-                            <TableCell>{folio.nota}</TableCell>
-                            <TableCell>{folio.abono}</TableCell>
-                            <TableCell>{folio.total}</TableCell>
-                            <TableCell>{folio.nombre}</TableCell>
-                            <TableCell>{folio.apellido_paterno}</TableCell>
-                            <TableCell>{folio.apellido_materno}</TableCell>
-                            <TableCell align="center">
-                              <IconButton 
-                                color="success" 
-                                onClick={() => handlePrintFolio(folio)}
-                              >
-                                <PrintIcon sx={{ color: '#388e3c' }} />
-                              </IconButton>
-                            </TableCell>
-                          </TableRow>
-                        )) : (
-                          <TableRow>
-                            <TableCell colSpan={11} align="center">
-                              No hay folios registrados.
-                            </TableCell>
-                          </TableRow>
-                        )}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </Paper>
-              );
-            default:
-              return null;
-          }
-        })()}
+        {currentView === 'students' && <StudentsView readOnly={true} />}
+        {currentView === 'payments' && <PaymentsView />}
       </Box>
     </Box>
   );

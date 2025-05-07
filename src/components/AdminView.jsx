@@ -13,11 +13,14 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Divider,
+  Chip,
 } from '@mui/material';
 import PeopleIcon from '@mui/icons-material/People';
 import PersonIcon from '@mui/icons-material/Person';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import LogoutIcon from '@mui/icons-material/Logout';
+import SchoolIcon from '@mui/icons-material/School';
 import { ToastContainer } from 'react-toastify';
 
 // Importar componentes de vistas
@@ -29,6 +32,7 @@ const drawerWidth = 240;
 
 const AdminView = () => {
   const [currentView, setCurrentView] = useState('students');
+  const [selectedNivel, setSelectedNivel] = useState(null);
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
@@ -36,6 +40,11 @@ const AdminView = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     navigate('/', { replace: true });
+  };
+
+  const handleNivelClick = (nivel) => {
+    setSelectedNivel(nivel);
+    setCurrentView('students');
   };
 
   return (
@@ -84,24 +93,87 @@ const AdminView = () => {
           <List>
             <ListItem 
               button 
-              selected={currentView === 'students'}
-              onClick={() => setCurrentView('students')}
+              selected={currentView === 'students' && !selectedNivel}
+              onClick={() => {
+                setCurrentView('students');
+                setSelectedNivel(null);
+              }}
             >
               <ListItemIcon><PeopleIcon /></ListItemIcon>
-              <ListItemText primary="Estudiantes" />
+              <ListItemText primary="Todos los Estudiantes" />
             </ListItem>
+            
+            <Divider sx={{ my: 1.5 }} />
+            <Typography variant="subtitle2" sx={{ pl: 2, py: 1, color: '#666', fontWeight: 'bold' }}>
+              Niveles Educativos
+            </Typography>
+            
+            <ListItem 
+              button 
+              selected={selectedNivel === 'Primaria'}
+              onClick={() => handleNivelClick('Primaria')}
+            >
+              <ListItemIcon><SchoolIcon sx={{ color: '#4caf50' }} /></ListItemIcon>
+              <ListItemText primary="Primaria" />
+            </ListItem>
+            
+            <ListItem 
+              button 
+              selected={selectedNivel === 'Secundaria'}
+              onClick={() => handleNivelClick('Secundaria')}
+            >
+              <ListItemIcon><SchoolIcon sx={{ color: '#2196f3' }} /></ListItemIcon>
+              <ListItemText primary="Secundaria" />
+            </ListItem>
+            
+            <ListItem 
+              button 
+              selected={selectedNivel === 'Preparatoria'}
+              onClick={() => handleNivelClick('Preparatoria')}
+            >
+              <ListItemIcon><SchoolIcon sx={{ color: '#9c27b0' }} /></ListItemIcon>
+              <ListItemText primary="Preparatoria" />
+            </ListItem>
+            
+            <ListItem 
+              button 
+              selected={selectedNivel === 'Curso belleza'}
+              onClick={() => handleNivelClick('Curso belleza')}
+            >
+              <ListItemIcon><SchoolIcon sx={{ color: '#e91e63' }} /></ListItemIcon>
+              <ListItemText primary="Curso belleza" />
+            </ListItem>
+            
+            <ListItem 
+              button 
+              selected={selectedNivel === 'Constancia'}
+              onClick={() => handleNivelClick('Constancia')}
+            >
+              <ListItemIcon><SchoolIcon sx={{ color: '#ff9800' }} /></ListItemIcon>
+              <ListItemText primary="Constancia" />
+            </ListItem>
+            
+            <Divider sx={{ my: 1.5 }} />
+            
             <ListItem 
               button 
               selected={currentView === 'users'}
-              onClick={() => setCurrentView('users')}
+              onClick={() => {
+                setCurrentView('users');
+                setSelectedNivel(null);
+              }}
             >
               <ListItemIcon><PersonIcon /></ListItemIcon>
               <ListItemText primary="Gestión de Usuarios" />
             </ListItem>
+            
             <ListItem 
               button 
               selected={currentView === 'payments'}
-              onClick={() => setCurrentView('payments')}
+              onClick={() => {
+                setCurrentView('payments');
+                setSelectedNivel(null);
+              }}
             >
               <ListItemIcon><ReceiptIcon /></ListItemIcon>
               <ListItemText primary="Folios de Pago" />
@@ -123,7 +195,22 @@ const AdminView = () => {
 
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Toolbar />
-        {currentView === 'students' && <StudentsView readOnly={false} />}
+        {currentView === 'students' && (
+          <>
+            {selectedNivel && (
+              <Box sx={{ mb: 3, display: 'flex', alignItems: 'center' }}>
+                <Typography variant="h6" sx={{ mr: 2 }}>Filtro activo:</Typography>
+                <Chip 
+                  label={selectedNivel} 
+                  color="primary" 
+                  onDelete={() => setSelectedNivel(null)}
+                  sx={{ fontWeight: 'bold' }}
+                />
+              </Box>
+            )}
+            <StudentsView readOnly={false} nivelEducativo={selectedNivel} />
+          </>
+        )}
         {currentView === 'users' && <UsersView />}
         {currentView === 'payments' && <PaymentsView />}
       </Box>

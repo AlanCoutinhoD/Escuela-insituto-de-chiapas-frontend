@@ -179,6 +179,9 @@ const AddStudentModal = ({ open, onClose }) => {
               <MenuItem value="Primaria">Primaria</MenuItem>
               <MenuItem value="Secundaria">Secundaria</MenuItem>
               <MenuItem value="Preparatoria">Preparatoria</MenuItem>
+              <MenuItem value="Examen">Examen</MenuItem>
+              <MenuItem value="Curso belleza">Curso belleza</MenuItem>
+              <MenuItem value="Constancia">Constancia</MenuItem>
             </Select>
           </FormControl>
           <TextField

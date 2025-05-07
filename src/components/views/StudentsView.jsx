@@ -37,7 +37,7 @@ import AddStudentModal from '../AddStudentModal';
 import EditStudentModal from '../EditStudentModal';
 import CreatePaymentModal from '../CreatePaymentModal';
 
-const StudentsView = () => {
+const StudentsView = ({ readOnly, nivelEducativo }) => {
   const [students, setStudents] = useState([]);
   const [openModal, setOpenModal] = useState(false);
   const [openEditModal, setOpenEditModal] = useState(false);
@@ -182,11 +182,19 @@ const StudentsView = () => {
   };
 
   // Fetch students from backend
+  // Modificar fetchStudents para usar el nivelEducativo si está presente
   const fetchStudents = async () => {
     try {
       const token = localStorage.getItem('token');
+      let url = `https://escuelaback-production.up.railway.app/api/students/all`;
+      
+      // Si hay un nivel educativo seleccionado, usar la URL de búsqueda
+      if (nivelEducativo) {
+        url = `https://escuelaback-production.up.railway.app/api/students/search?nivel_educativo=${encodeURIComponent(nivelEducativo)}`;
+      }
+      
       const response = await axios.get(
-        `https://escuelaback-production.up.railway.app/api/students/all`,
+        url,
         {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -202,9 +210,10 @@ const StudentsView = () => {
     }
   };
 
+  // Actualizar estudiantes cuando cambie el nivelEducativo
   useEffect(() => {
     fetchStudents();
-  }, []);
+  }, [nivelEducativo]);
 
   return (
     <>

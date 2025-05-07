@@ -11,6 +11,11 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Grid
 } from '@mui/material';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import axios from 'axios';
@@ -18,13 +23,21 @@ import jsPDF from 'jspdf';
 
 const PaymentsView = () => {
   const [folios, setFolios] = useState([]);
+  const [tipoSeleccionado, setTipoSeleccionado] = useState('todos');
+  const [nivelesEducativos, setNivelesEducativos] = useState([]);
 
   // Fetch folios from backend
-  const fetchFolios = async () => {
+  const fetchFolios = async (tipo = 'todos') => {
     try {
       const token = localStorage.getItem('token');
+      let url = `https://escuelaback-production.up.railway.app/api/payments/all`;
+      
+      if (tipo !== 'todos') {
+        url = `https://escuelaback-production.up.railway.app/api/payments/search?nivel_educativo=${encodeURIComponent(tipo)}`;
+      }
+      
       const response = await axios.get(
-        `https://escuelaback-production.up.railway.app/api/payments/all`,
+        url,
         {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -40,9 +53,62 @@ const PaymentsView = () => {
     }
   };
 
+  // Obtener niveles educativos únicos
+  const fetchNivelesEducativos = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(
+        `https://escuelaback-production.up.railway.app/api/students/niveles`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+      
+      // Si la API no proporciona los niveles, usar una lista predefinida
+      if (!response.data || response.data.length === 0) {
+        setNivelesEducativos([
+          'Preescolar',
+          'Primaria',
+          'Secundaria',
+          'Preparatoria',
+          'Universidad',
+          'Examen',
+          'Curso belleza',
+          'Constancia'
+        ]);
+      } else {
+        setNivelesEducativos(response.data);
+      }
+    } catch (error) {
+      // Si hay error, usar una lista predefinida
+      setNivelesEducativos([
+        'Preescolar',
+        'Primaria',
+        'Secundaria',
+        'Preparatoria',
+        'Universidad',
+        'Examen',
+        'Curso belleza',
+        'Constancia'
+      ]);
+    }
+  };
+
   useEffect(() => {
     fetchFolios();
+    fetchNivelesEducativos();
   }, []);
+
+  // Actualizar folios cuando cambia el tipo seleccionado
+  useEffect(() => {
+    fetchFolios(tipoSeleccionado);
+  }, [tipoSeleccionado]);
+
+  const handleTipoChange = (event) => {
+    setTipoSeleccionado(event.target.value);
+  };
 
   const handlePrintFolio = async (folio) => {
     const doc = new jsPDF({
@@ -147,6 +213,27 @@ const PaymentsView = () => {
           Administre los folios de pago del instituto
         </Typography>
       </Box>
+      
+      <Grid container spacing={2} sx={{ mb: 3 }}>
+        <Grid item xs={12} md={4}>
+          <FormControl fullWidth>
+            <InputLabel id="tipo-select-label">Filtrar por Nivel Educativo</InputLabel>
+            <Select
+              labelId="tipo-select-label"
+              id="tipo-select"
+              value={tipoSeleccionado}
+              label="Filtrar por Nivel Educativo"
+              onChange={handleTipoChange}
+            >
+              <MenuItem value="todos">Todos los niveles</MenuItem>
+              {nivelesEducativos.map((nivel) => (
+                <MenuItem key={nivel} value={nivel}>{nivel}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+      </Grid>
+      
       <Paper sx={{ p: 3, backgroundColor: 'white', borderRadius: 2 }}>
         <TableContainer>
           <Table>
@@ -161,6 +248,7 @@ const PaymentsView = () => {
                 <TableCell>Nombre</TableCell>
                 <TableCell>Apellido Paterno</TableCell>
                 <TableCell>Apellido Materno</TableCell>
+                <TableCell>Nivel Educativo</TableCell>
                 <TableCell align="center">Acciones</TableCell>
               </TableRow>
             </TableHead>
@@ -176,6 +264,7 @@ const PaymentsView = () => {
                   <TableCell>{folio.nombre}</TableCell>
                   <TableCell>{folio.apellido_paterno}</TableCell>
                   <TableCell>{folio.apellido_materno}</TableCell>
+                  <TableCell>{folio.nivel_educativo}</TableCell>
                   <TableCell align="center">
                     <IconButton 
                       color="success" 
@@ -187,7 +276,7 @@ const PaymentsView = () => {
                 </TableRow>
               )) : (
                 <TableRow>
-                  <TableCell colSpan={10} align="center">
+                  <TableCell colSpan={11} align="center">
                     No hay folios de pago registrados.
                   </TableCell>
                 </TableRow>
