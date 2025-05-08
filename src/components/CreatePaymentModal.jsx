@@ -113,7 +113,7 @@ const CreatePaymentModal = ({ open, onClose, student }) => {
     const doc = new jsPDF();
   
     // Get logo as base64
-    const logoData = await getBase64ImageFromURL('/images/logo.jpeg');
+    const logoData = await getBase64ImageFromURL('/images/logo.png');
     // Add logo to PDF (x, y, width, height)
     doc.addImage(logoData, 'JPEG', 80, 10, 50, 30);
   
@@ -137,7 +137,7 @@ const CreatePaymentModal = ({ open, onClose, student }) => {
       <DialogTitle sx={{ textAlign: 'center', pb: 1 }}>
         {/* Logo at the top of the modal */}
         <img
-          src="/images/logo.jpeg"
+          src="/images/logo.png"
           alt="Instituto Valle de Chiapas Logo"
           style={{ width: 60, height: 60, objectFit: 'contain', marginBottom: 8 }}
         />

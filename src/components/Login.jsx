@@ -85,7 +85,7 @@ const Login = () => {
         >
           {/* School Logo */}
           <img
-            src="/images/logo.jpeg"
+            src="/images/logo.png"
             alt="Instituto Valle de Chiapas Logo"
             style={{ width: 100, height: 100, objectFit: 'contain', marginBottom: 16 }}
           />

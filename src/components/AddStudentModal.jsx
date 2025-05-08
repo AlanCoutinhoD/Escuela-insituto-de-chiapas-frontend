@@ -12,6 +12,7 @@ import {
   FormControl,
   InputLabel,
   IconButton,
+  InputAdornment,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { toast } from 'react-toastify';
@@ -27,7 +28,9 @@ const AddStudentModal = ({ open, onClose }) => {
     telefono: '',
     email: '',
     tutor: '',
-    numero_telefonico_tutor: ''
+    numero_telefonico_tutor: '',
+    dia_pago: '',
+    monto_mensual: ''
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -209,11 +212,11 @@ const AddStudentModal = ({ open, onClose }) => {
           />
           <TextField
             fullWidth
-            label="Nombre del Tutor"
+            label="Tutor"
             name="tutor"
             value={formData.tutor}
             onChange={handleChange}
-            placeholder="Nombre completo del tutor"
+            placeholder="Nombre del tutor"
             sx={{ mb: 2 }}
             required
             disabled={isSubmitting}
@@ -229,25 +232,54 @@ const AddStudentModal = ({ open, onClose }) => {
             required
             disabled={isSubmitting}
           />
+          <TextField
+            fullWidth
+            label="Día de Pago"
+            name="dia_pago"
+            type="number"
+            value={formData.dia_pago}
+            onChange={handleChange}
+            placeholder="Día del mes para el pago"
+            InputProps={{ inputProps: { min: 1, max: 31 } }}
+            sx={{ mb: 2 }}
+            required
+            disabled={isSubmitting}
+          />
+          <TextField
+            fullWidth
+            label="Monto Mensual"
+            name="monto_mensual"
+            type="number"
+            value={formData.monto_mensual}
+            onChange={handleChange}
+            placeholder="Monto mensual a pagar"
+            InputProps={{ 
+              startAdornment: <InputAdornment position="start">$</InputAdornment>,
+              inputProps: { step: "0.01", min: 0 }
+            }}
+            sx={{ mb: 2 }}
+            required
+            disabled={isSubmitting}
+          />
         </form>
       </DialogContent>
-      <DialogActions sx={{ p: 2 }}>
+      <DialogActions sx={{ px: 3, pb: 3 }}>
         <Button 
           onClick={handleClose} 
-          sx={{ color: '#666' }}
           disabled={isSubmitting}
+          sx={{ color: '#666' }}
         >
           Cancelar
         </Button>
         <Button
+          variant="contained"
           type="submit"
           form="add-student-form"
-          variant="contained"
+          disabled={isSubmitting}
           sx={{
             backgroundColor: '#2e7d32',
             '&:hover': { backgroundColor: '#1b5e20' }
           }}
-          disabled={isSubmitting}
         >
           {isSubmitting ? 'Guardando...' : 'Guardar Estudiante'}
         </Button>

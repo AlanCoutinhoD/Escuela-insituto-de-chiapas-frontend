@@ -105,7 +105,7 @@ const UserView = () => {
       format: 'a4'
     });
 
-    const logoUrl = `${window.location.origin}/images/logo.jpeg`;
+    const logoUrl = `${window.location.origin}/images/logo.png`;
     const logoImg = new window.Image();
     logoImg.src = logoUrl;
 
@@ -198,7 +198,7 @@ const UserView = () => {
       // Total row
       doc.rect(10, 120, 200, 10);
       doc.rect(210, 120, 70, 10);
-      doc.text('IMPORTE TOTAL CON LETRA:', 12, 127);
+      doc.text('IMPORTE TOTAL CON LETRAS:', 12, 127);
       doc.text(`(${folio.total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })} M.N.)`, 90, 127);
       doc.text('TOTAL', 235, 127);
       doc.text(`${Number(folio.total).toFixed(2)}`, 250, 127);
@@ -226,7 +226,7 @@ const UserView = () => {
         <Toolbar sx={{ justifyContent: 'space-between', minHeight: 100 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <img
-              src="/images/logo.jpeg"
+              src="/images/logo.png"
               alt="Instituto Valle de Chiapas Logo"
               style={{ width: 80, height: 80, objectFit: 'contain', marginRight: 16 }}
             />

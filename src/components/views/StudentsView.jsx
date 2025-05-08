@@ -325,18 +325,19 @@ const StudentsView = ({ readOnly, nivelEducativo }) => {
         </Box>
         <TableContainer sx={{ maxHeight: 500 }}>
           <Table stickyHeader>
+            
             <TableHead>
               <TableRow>
                 <TableCell>Nombre</TableCell>
                 <TableCell>Apellido Paterno</TableCell>
                 <TableCell>Apellido Materno</TableCell>
-                <TableCell>Fecha de Nacimiento</TableCell>
                 <TableCell>Nivel Educativo</TableCell>
                 <TableCell>Teléfono</TableCell>
-                <TableCell>Correo Electrónico</TableCell>
+                <TableCell>Email</TableCell>
                 <TableCell>Tutor</TableCell>
-                <TableCell>Número Telefónico Tutor</TableCell>
-                <TableCell align="center">Acciones</TableCell>
+                <TableCell>Día de Pago</TableCell>
+                <TableCell>Monto Mensual</TableCell>
+                <TableCell>Acciones</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -345,15 +346,17 @@ const StudentsView = ({ readOnly, nivelEducativo }) => {
                   <TableCell>{student.nombre}</TableCell>
                   <TableCell>{student.apellido_paterno}</TableCell>
                   <TableCell>{student.apellido_materno}</TableCell>
-                  <TableCell>
-                    {student.fecha_nacimiento ? new Date(student.fecha_nacimiento).toLocaleDateString() : ''}
-                  </TableCell>
                   <TableCell>{student.nivel_educativo}</TableCell>
                   <TableCell>{student.telefono}</TableCell>
                   <TableCell>{student.email}</TableCell>
                   <TableCell>{student.tutor}</TableCell>
-                  <TableCell>{student.numero_telefonico_tutor}</TableCell>
-                  <TableCell align="center">
+                  <TableCell>{student.dia_pago || '-'}</TableCell>
+                  <TableCell>
+                    {student.monto_mensual 
+                      ? `$${parseFloat(student.monto_mensual).toFixed(2)}` 
+                      : '-'}
+                  </TableCell>
+                  <TableCell>
                     <Box sx={{ display: 'flex', gap: 1 }}>
                       <IconButton 
                         size="small" 

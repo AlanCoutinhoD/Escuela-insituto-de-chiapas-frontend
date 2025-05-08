@@ -54,7 +54,7 @@ const AdminView = () => {
         <Toolbar sx={{ justifyContent: 'space-between' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <img
-              src="/images/logo.jpeg"
+              src="/images/logo.png"
               alt="Instituto Valle de Chiapas Logo"
               style={{ width: 80, height: 80, objectFit: 'contain', marginRight: 16 }}
             />

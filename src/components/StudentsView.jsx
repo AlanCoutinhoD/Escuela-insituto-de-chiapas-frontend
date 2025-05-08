@@ -200,18 +200,20 @@ const StudentsView = ({ readOnly }) => {
           sx={{ width: 250 }}
         />
         <Button
-          variant="contained"
-          sx={{
-            backgroundColor: '#2e7d32',
-            '&:hover': { backgroundColor: '#1b5e20' }
-          }}
+          variant="outlined"
           onClick={handleSearch}
+          sx={{
+            borderColor: '#2e7d32',
+            color: '#2e7d32',
+            '&:hover': { borderColor: '#1b5e20', backgroundColor: '#f1f8e9' }
+          }}
         >
           Buscar
         </Button>
       </Box>
+
       <Paper sx={{ p: 3, backgroundColor: 'white', borderRadius: 2 }}>
-        {filteredStudents.length === 0 ? (
+        {students.length === 0 ? (
           <Typography sx={{ color: '#666', textAlign: 'center', py: 4 }}>
             No hay estudiantes registrados.
           </Typography>
@@ -223,12 +225,13 @@ const StudentsView = ({ readOnly }) => {
                   <TableCell>Nombre</TableCell>
                   <TableCell>Apellido Paterno</TableCell>
                   <TableCell>Apellido Materno</TableCell>
-                  <TableCell>Fecha de Nacimiento</TableCell>
                   <TableCell>Nivel Educativo</TableCell>
                   <TableCell>Teléfono</TableCell>
-                  <TableCell>Correo Electrónico</TableCell>
-                  {!readOnly && <TableCell>Acciones</TableCell>}
-                  {readOnly && <TableCell>Acciones</TableCell>}
+                  <TableCell>Email</TableCell>
+                  <TableCell>Tutor</TableCell>
+                  <TableCell>Día de Pago</TableCell>
+                  <TableCell>Monto Mensual</TableCell>
+                  <TableCell>Acciones</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -237,26 +240,31 @@ const StudentsView = ({ readOnly }) => {
                     <TableCell>{student.nombre}</TableCell>
                     <TableCell>{student.apellido_paterno}</TableCell>
                     <TableCell>{student.apellido_materno}</TableCell>
-                    <TableCell>
-                      {new Date(student.fecha_nacimiento).toLocaleDateString()}
-                    </TableCell>
                     <TableCell>{student.nivel_educativo}</TableCell>
                     <TableCell>{student.telefono}</TableCell>
                     <TableCell>{student.email}</TableCell>
+                    <TableCell>{student.tutor}</TableCell>
+                    <TableCell>{student.dia_pago || '-'}</TableCell>
                     <TableCell>
-                      <Box sx={{ display: 'flex', gap: 1 }}>
-                        {/* Edit and Generate Folio for both admin and user */}
-                        <IconButton
-                          size="small"
-                          color="primary"
-                          onClick={() => handleOpenEditModal(student)}
-                        >
-                          <EditIcon />
-                        </IconButton>
-                        <IconButton
-                          size="small"
-                          color="success"
+                      {student.monto_mensual 
+                        ? `$${parseFloat(student.monto_mensual).toFixed(2)}` 
+                        : '-'}
+                    </TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex' }}>
+                        {!readOnly && (
+                          <IconButton 
+                            size="small" 
+                            onClick={() => handleOpenEditModal(student)}
+                            sx={{ color: '#2196f3' }}
+                          >
+                            <EditIcon />
+                          </IconButton>
+                        )}
+                        <IconButton 
+                          size="small" 
                           onClick={() => handleOpenPaymentModal(student)}
+                          sx={{ color: '#4caf50' }}
                         >
                           <ReceiptIcon />
                         </IconButton>
@@ -271,20 +279,28 @@ const StudentsView = ({ readOnly }) => {
       </Paper>
 
       {/* Modals */}
-      <EditStudentModal
-        open={openEditModal}
-        onClose={handleCloseEditModal}
-        student={selectedStudentForEdit}
-      />
-      <CreatePaymentModal
-        open={openPaymentModal}
-        onClose={handleClosePaymentModal}
-        student={selectedStudent}
-      />
-      <AddStudentModal
-        open={openAddModal}
-        onClose={handleCloseAddModal}
-      />
+      {openEditModal && (
+        <EditStudentModal
+          open={openEditModal}
+          onClose={handleCloseEditModal}
+          student={selectedStudentForEdit}
+        />
+      )}
+
+      {openPaymentModal && (
+        <CreatePaymentModal
+          open={openPaymentModal}
+          onClose={handleClosePaymentModal}
+          student={selectedStudent}
+        />
+      )}
+
+      {openAddModal && (
+        <AddStudentModal
+          open={openAddModal}
+          onClose={handleCloseAddModal}
+        />
+      )}
     </Box>
   );
 };

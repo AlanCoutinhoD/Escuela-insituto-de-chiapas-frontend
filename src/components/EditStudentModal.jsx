@@ -9,6 +9,7 @@ import {
   Typography,
   IconButton,
   MenuItem,
+  InputAdornment
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { toast } from 'react-toastify';
@@ -25,6 +26,8 @@ const EditStudentModal = ({ open, onClose, student }) => {
     email: '',
     tutor: '',
     numero_telefonico_tutor: '',
+    dia_pago: '',
+    monto_mensual: ''
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -41,6 +44,8 @@ const EditStudentModal = ({ open, onClose, student }) => {
         email: student.email || '',
         tutor: student.tutor || '',
         numero_telefonico_tutor: student.numero_telefonico_tutor || '',
+        dia_pago: student.dia_pago || '',
+        monto_mensual: student.monto_mensual || ''
       });
     }
   }, [student]);
@@ -188,6 +193,7 @@ const EditStudentModal = ({ open, onClose, student }) => {
             type="email"
             value={formData.email}
             onChange={handleChange}
+            sx={{ mb: 2 }}
           />
           <TextField
             fullWidth
@@ -199,31 +205,54 @@ const EditStudentModal = ({ open, onClose, student }) => {
           />
           <TextField
             fullWidth
-            label="Número Telefónico Tutor"
-            name="numero_telefonico_tutor" // <-- updated here
-            value={formData.numero_telefonico_tutor} // <-- updated here
+            label="Teléfono del Tutor"
+            name="numero_telefonico_tutor"
+            value={formData.numero_telefonico_tutor}
             onChange={handleChange}
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            fullWidth
+            label="Día de Pago"
+            name="dia_pago"
+            type="number"
+            value={formData.dia_pago}
+            onChange={handleChange}
+            InputProps={{ inputProps: { min: 1, max: 31 } }}
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            fullWidth
+            label="Monto Mensual"
+            name="monto_mensual"
+            type="number"
+            value={formData.monto_mensual}
+            onChange={handleChange}
+            InputProps={{ 
+              startAdornment: <InputAdornment position="start">$</InputAdornment>,
+              inputProps: { step: "0.01", min: 0 }
+            }}
             sx={{ mb: 2 }}
           />
         </form>
       </DialogContent>
-      <DialogActions sx={{ p: 2 }}>
+      <DialogActions>
         <Button 
           onClick={handleClose} 
-          sx={{ color: '#666' }}
           disabled={isSubmitting}
+          sx={{ color: '#666' }}
         >
           Cancelar
         </Button>
         <Button
+          variant="contained"
           type="submit"
           form="edit-student-form"
-          variant="contained"
+          disabled={isSubmitting}
           sx={{
             backgroundColor: '#2e7d32',
             '&:hover': { backgroundColor: '#1b5e20' }
           }}
-          disabled={isSubmitting}
         >
           {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
         </Button>
