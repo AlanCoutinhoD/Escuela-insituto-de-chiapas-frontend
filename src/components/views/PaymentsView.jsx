@@ -16,9 +16,16 @@ import {
   Select,
   MenuItem,
   Grid,
-  Chip
+  Chip,
+  Toolbar,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
 import ReceiptIcon from '@mui/icons-material/Receipt';
+import DeleteIcon from '@mui/icons-material/Delete';
 import axios from 'axios';
 import jsPDF from 'jspdf';
 
@@ -26,6 +33,9 @@ const PaymentsView = () => {
   const [folios, setFolios] = useState([]);
   const [tipoSeleccionado, setTipoSeleccionado] = useState('todos');
   const [nivelesEducativos, setNivelesEducativos] = useState([]);
+  // Add these missing state variables
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [folioToDelete, setFolioToDelete] = useState(null);
 
   // Fetch folios from backend
   const fetchFolios = async (tipo = 'todos') => {
@@ -240,69 +250,103 @@ const PaymentsView = () => {
     };
   };
 
+  // Funciones para manejar la eliminación
+  const handleOpenDeleteDialog = (folio) => {
+    setFolioToDelete(folio);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setFolioToDelete(null);
+  };
+
+  const handleDeleteFolio = async () => {
+    if (!folioToDelete) return;
+    
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(
+        `https://escuelaback-production.up.railway.app/api/payments/delete/${folioToDelete.id}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+      
+      toast.success('Folio de pago eliminado correctamente', {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      
+      // Actualizar la lista de folios
+      fetchFolios(tipoSeleccionado);
+      
+      // Cerrar el diálogo
+      setDeleteDialogOpen(false);
+      setFolioToDelete(null);
+    } catch (error) {
+      console.error('Error al eliminar folio:', error);
+      toast.error('Error al eliminar el folio de pago', {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    }
+  };
+
   return (
-    <>
+    <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+      <Toolbar />
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h5" sx={{ color: '#2e7d32', mb: 1, fontSize: '2rem' }}>
+        <Typography variant="h5" sx={{ color: '#2e7d32', mb: 1 }}>
           Folios de Pago
         </Typography>
-        <Typography variant="body1" sx={{ color: '#666', fontSize: '1.2rem' }}>
-          Administre los folios de pago del instituto
+        <Typography variant="body1" sx={{ color: '#666' }}>
+          Administre los folios de pago de los estudiantes
         </Typography>
       </Box>
-      
-      <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid item xs={12} md={4}>
-          <FormControl fullWidth>
-            <InputLabel id="tipo-select-label">Filtrar por Nivel Educativo</InputLabel>
-            <Select
-              labelId="tipo-select-label"
-              id="tipo-select"
-              value={tipoSeleccionado}
-              label="Filtrar por Nivel Educativo"
-              onChange={handleTipoChange}
-            >
-              <MenuItem value="todos">Todos los niveles</MenuItem>
-              {nivelesEducativos.map((nivel) => (
-                <MenuItem key={nivel} value={nivel}>{nivel}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Grid>
-      </Grid>
-      
+    
       <Paper sx={{ p: 3, backgroundColor: 'white', borderRadius: 2 }}>
         <TableContainer>
           <Table>
             <TableHead>
               <TableRow>
                 <TableCell>Folio</TableCell>
+                <TableCell>Estudiante</TableCell>
+                <TableCell>Nivel Educativo</TableCell>
+                <TableCell>Tutor</TableCell>
+                <TableCell>Fecha de Creación</TableCell>
                 <TableCell>Mes de Pago</TableCell>
                 <TableCell>Año de Pago</TableCell>
-                <TableCell>Nota</TableCell>
                 <TableCell>Abono</TableCell>
                 <TableCell>Total</TableCell>
                 <TableCell>Restante</TableCell>
-                <TableCell>Nombre</TableCell>
-                <TableCell>Apellido Paterno</TableCell>
-                <TableCell>Apellido Materno</TableCell>
-                <TableCell>Nivel Educativo</TableCell>
-                <TableCell align="center">Acciones</TableCell>
+                <TableCell>Acciones</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {folios && folios.length > 0 ? folios.map((folio) => {
+              {folios.map((payment) => {
                 // Calcular el monto restante
-                const abono = parseFloat(folio.abono) || 0;
-                const total = parseFloat(folio.total) || 0;
+                const abono = parseFloat(payment.abono) || 0;
+                const total = parseFloat(payment.total) || 0;
                 const restante = total - abono;
                 
                 return (
-                  <TableRow key={folio.id}>
-                    <TableCell>{folio.folio}</TableCell>
-                    <TableCell>{folio.mes_pago}</TableCell>
-                    <TableCell>{folio.anio_pago}</TableCell>
-                    <TableCell>{folio.nota}</TableCell>
+                  <TableRow key={payment.id}>
+                    <TableCell>{payment.folio}</TableCell>
+                    <TableCell>
+                      {`${payment.nombre} ${payment.apellido_paterno} ${payment.apellido_materno}`}
+                    </TableCell>
+                    <TableCell>{payment.nivel_educativo}</TableCell>
+                    <TableCell>{payment.tutor}</TableCell>
+                    <TableCell>
+                      {new Date(payment.fecha_creacion).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      {new Date(0, payment.mes_pago - 1).toLocaleString('es-ES', { month: 'long' })}
+                    </TableCell>
+                    <TableCell>{payment.anio_pago}</TableCell>
                     <TableCell>${abono.toFixed(2)}</TableCell>
                     <TableCell>${total.toFixed(2)}</TableCell>
                     <TableCell>
@@ -319,32 +363,64 @@ const PaymentsView = () => {
                         </span>
                       )}
                     </TableCell>
-                    <TableCell>{folio.nombre}</TableCell>
-                    <TableCell>{folio.apellido_paterno}</TableCell>
-                    <TableCell>{folio.apellido_materno}</TableCell>
-                    <TableCell>{folio.nivel_educativo}</TableCell>
-                    <TableCell align="center">
+                    <TableCell>
                       <IconButton 
-                        color="success" 
-                        onClick={() => handlePrintFolio(folio)}
+                        color="primary" 
+                        onClick={() => handlePrintFolio(payment)}
+                        size="small"
+                        title="Imprimir folio"
                       >
-                        <ReceiptIcon sx={{ color: '#388e3c' }} />
+                        <ReceiptIcon />
+                      </IconButton>
+                      <IconButton 
+                        color="error" 
+                        onClick={() => handleOpenDeleteDialog(payment)}
+                        size="small"
+                        title="Eliminar folio"
+                      >
+                        <DeleteIcon />
                       </IconButton>
                     </TableCell>
                   </TableRow>
                 );
-              }) : (
-                <TableRow>
-                  <TableCell colSpan={12} align="center">
-                    No hay folios de pago registrados.
-                  </TableCell>
-                </TableRow>
-              )}
+              })}
             </TableBody>
           </Table>
         </TableContainer>
       </Paper>
-    </>
+
+      {/* Diálogo de confirmación para eliminar */}
+      <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
+        <DialogTitle>Confirmar eliminación</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1">
+            ¿Está seguro que desea eliminar el folio de pago #{folioToDelete?.folio}?
+          </Typography>
+          {folioToDelete && (
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="body2">
+                <strong>Estudiante:</strong> {folioToDelete.nombre} {folioToDelete.apellido_paterno} {folioToDelete.apellido_materno}
+              </Typography>
+              <Typography variant="body2">
+                <strong>Mes de pago:</strong> {new Date(0, folioToDelete.mes_pago - 1).toLocaleString('es-ES', { month: 'long' })} {folioToDelete.anio_pago}
+              </Typography>
+              <Typography variant="body2">
+                <strong>Total:</strong> ${parseFloat(folioToDelete.total).toFixed(2)}
+              </Typography>
+            </Box>
+          )}
+          <Typography variant="body2" color="error" sx={{ mt: 2, fontWeight: 'bold' }}>
+            Esta acción no se puede deshacer.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog}>Cancelar</Button>
+          <Button onClick={handleDeleteFolio} color="error" variant="contained">
+            Eliminar
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 };
 

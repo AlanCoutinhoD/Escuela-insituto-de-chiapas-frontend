@@ -87,14 +87,14 @@ const Login = () => {
           <img
             src="/images/logo.png"
             alt="Instituto Valle de Chiapas Logo"
-            style={{ width: 100, height: 100, objectFit: 'contain', marginBottom: 16 }}
+            style={{ width: 150, height: 150, objectFit: 'contain', marginBottom: 16 }}
           />
           <Typography 
             variant="h4" 
             component="div" 
             sx={{ color: '#2e7d32', fontSize: '2rem', fontWeight: 'bold' }}
           >
-            IVC
+            IVCH
           </Typography>
           <Typography 
             variant="h5" 
