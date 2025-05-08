@@ -109,6 +109,7 @@ const PaymentsView = () => {
     setTipoSeleccionado(event.target.value);
   };
 
+  // Actualizar la función de generación de PDF para incluir los nuevos campos
   const handlePrintFolio = async (folio) => {
     const doc = new jsPDF({
       orientation: 'landscape',
@@ -165,15 +166,18 @@ const PaymentsView = () => {
   
       doc.text('1', 18, 80);
   
+      // Actualizar la descripción para incluir los nuevos campos
       const descLinesRaw = [
         'PAGO DE COLEGIATURA CORRESPONDIENTE',
         `AL MES DE ${String(folio.mes_pago).toUpperCase()} ${folio.anio_pago}`,
         `ALUMNO:  ${folio.nombre} ${folio.apellido_paterno} ${folio.apellido_materno}`,
         `NIVEL EDUCATIVO: ${folio.nivel_educativo || ''}`,
-        'semana',
-        'fecha de deposito',
-        'recargos'
+        `TUTOR: ${folio.tutor || ''}`,
+        `TELÉFONO TUTOR: ${folio.numero_telefonico_tutor || ''}`,
+        `DÍA DE PAGO: ${folio.dia_pago || ''}`,
+        `MONTO MENSUAL: $${parseFloat(folio.monto_mensual).toFixed(2) || '0.00'}`
       ];
+      
       let descStartY = 80;
       let descX = 32;
       let descMaxWidth = 175;

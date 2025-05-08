@@ -30,7 +30,9 @@ const AddStudentModal = ({ open, onClose }) => {
     tutor: '',
     numero_telefonico_tutor: '',
     dia_pago: '',
-    monto_mensual: ''
+    monto_mensual: '',
+    fecha_registro: new Date().toISOString().split('T')[0],
+    hora_registro: new Date().toTimeString().split(' ')[0]
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -39,7 +41,11 @@ const AddStudentModal = ({ open, onClose }) => {
   // Reiniciar el formulario cuando se abre el modal
   useEffect(() => {
     if (open) {
-      setFormData(initialFormState);
+      setFormData({
+        ...initialFormState,
+        fecha_registro: new Date().toISOString().split('T')[0],
+        hora_registro: new Date().toTimeString().split(' ')[0]
+      });
       setIsSubmitting(false);
     }
   }, [open]);
@@ -189,6 +195,17 @@ const AddStudentModal = ({ open, onClose }) => {
           </FormControl>
           <TextField
             fullWidth
+            label="Teléfono"
+            name="telefono"
+            value={formData.telefono}
+            onChange={handleChange}
+            placeholder="Número telefónico"
+            sx={{ mb: 2 }}
+            required
+            disabled={isSubmitting}
+          />
+          <TextField
+            fullWidth
             label="Correo Electrónico"
             name="email"
             type="email"
@@ -201,22 +218,11 @@ const AddStudentModal = ({ open, onClose }) => {
           />
           <TextField
             fullWidth
-            label="Teléfono"
-            name="telefono"
-            value={formData.telefono}
-            onChange={handleChange}
-            placeholder="Número telefónico"
-            sx={{ mb: 2 }}
-            required
-            disabled={isSubmitting}
-          />
-          <TextField
-            fullWidth
-            label="Tutor"
+            label="Nombre del Tutor"
             name="tutor"
             value={formData.tutor}
             onChange={handleChange}
-            placeholder="Nombre del tutor"
+            placeholder="Nombre completo del tutor"
             sx={{ mb: 2 }}
             required
             disabled={isSubmitting}
@@ -240,7 +246,9 @@ const AddStudentModal = ({ open, onClose }) => {
             value={formData.dia_pago}
             onChange={handleChange}
             placeholder="Día del mes para el pago"
-            InputProps={{ inputProps: { min: 1, max: 31 } }}
+            InputProps={{
+              inputProps: { min: 1, max: 31 }
+            }}
             sx={{ mb: 2 }}
             required
             disabled={isSubmitting}
@@ -252,13 +260,35 @@ const AddStudentModal = ({ open, onClose }) => {
             type="number"
             value={formData.monto_mensual}
             onChange={handleChange}
-            placeholder="Monto mensual a pagar"
-            InputProps={{ 
+            placeholder="Monto de pago mensual"
+            InputProps={{
               startAdornment: <InputAdornment position="start">$</InputAdornment>,
-              inputProps: { step: "0.01", min: 0 }
+              inputProps: { min: 0, step: "0.01" }
             }}
             sx={{ mb: 2 }}
             required
+            disabled={isSubmitting}
+          />
+          <TextField
+            fullWidth
+            label="Fecha de Registro"
+            name="fecha_registro"
+            type="date"
+            value={formData.fecha_registro}
+            onChange={handleChange}
+            InputLabelProps={{ shrink: true }}
+            sx={{ mb: 2 }}
+            disabled={isSubmitting}
+          />
+          <TextField
+            fullWidth
+            label="Hora de Registro"
+            name="hora_registro"
+            type="time"
+            value={formData.hora_registro}
+            onChange={handleChange}
+            InputLabelProps={{ shrink: true }}
+            sx={{ mb: 2 }}
             disabled={isSubmitting}
           />
         </form>
@@ -267,16 +297,17 @@ const AddStudentModal = ({ open, onClose }) => {
         <Button 
           onClick={handleClose} 
           disabled={isSubmitting}
-          sx={{ color: '#666' }}
+          sx={{ mr: 1 }}
         >
           Cancelar
         </Button>
-        <Button
-          variant="contained"
+        <Button 
           type="submit"
           form="add-student-form"
+          variant="contained" 
+          color="primary"
           disabled={isSubmitting}
-          sx={{
+          sx={{ 
             backgroundColor: '#2e7d32',
             '&:hover': { backgroundColor: '#1b5e20' }
           }}

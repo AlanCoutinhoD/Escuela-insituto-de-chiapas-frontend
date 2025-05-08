@@ -27,7 +27,9 @@ const EditStudentModal = ({ open, onClose, student }) => {
     tutor: '',
     numero_telefonico_tutor: '',
     dia_pago: '',
-    monto_mensual: ''
+    monto_mensual: '',
+    fecha_registro: '',
+    hora_registro: ''
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -45,7 +47,9 @@ const EditStudentModal = ({ open, onClose, student }) => {
         tutor: student.tutor || '',
         numero_telefonico_tutor: student.numero_telefonico_tutor || '',
         dia_pago: student.dia_pago || '',
-        monto_mensual: student.monto_mensual || ''
+        monto_mensual: student.monto_mensual || '',
+        fecha_registro: student.fecha_registro?.split('T')[0] || '',
+        hora_registro: student.hora_registro || ''
       });
     }
   }, [student]);
@@ -218,7 +222,9 @@ const EditStudentModal = ({ open, onClose, student }) => {
             type="number"
             value={formData.dia_pago}
             onChange={handleChange}
-            InputProps={{ inputProps: { min: 1, max: 31 } }}
+            InputProps={{
+              inputProps: { min: 1, max: 31 }
+            }}
             sx={{ mb: 2 }}
           />
           <TextField
@@ -228,28 +234,47 @@ const EditStudentModal = ({ open, onClose, student }) => {
             type="number"
             value={formData.monto_mensual}
             onChange={handleChange}
-            InputProps={{ 
+            InputProps={{
               startAdornment: <InputAdornment position="start">$</InputAdornment>,
-              inputProps: { step: "0.01", min: 0 }
+              inputProps: { min: 0, step: "0.01" }
             }}
             sx={{ mb: 2 }}
+          />
+          <TextField
+            fullWidth
+            label="Fecha de Registro"
+            name="fecha_registro"
+            type="date"
+            value={formData.fecha_registro}
+            onChange={handleChange}
+            InputLabelProps={{ shrink: true }}
+            sx={{ mb: 2 }}
+            disabled
+          />
+          <TextField
+            fullWidth
+            label="Hora de Registro"
+            name="hora_registro"
+            type="time"
+            value={formData.hora_registro}
+            onChange={handleChange}
+            InputLabelProps={{ shrink: true }}
+            sx={{ mb: 2 }}
+            disabled
           />
         </form>
       </DialogContent>
       <DialogActions>
-        <Button 
-          onClick={handleClose} 
-          disabled={isSubmitting}
-          sx={{ color: '#666' }}
-        >
+        <Button onClick={handleClose} disabled={isSubmitting}>
           Cancelar
         </Button>
-        <Button
-          variant="contained"
-          type="submit"
-          form="edit-student-form"
+        <Button 
+          type="submit" 
+          form="edit-student-form" 
+          variant="contained" 
+          color="primary" 
           disabled={isSubmitting}
-          sx={{
+          sx={{ 
             backgroundColor: '#2e7d32',
             '&:hover': { backgroundColor: '#1b5e20' }
           }}

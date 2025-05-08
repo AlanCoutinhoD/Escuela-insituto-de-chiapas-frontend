@@ -70,6 +70,8 @@ const PaymentsView = () => {
                 <TableRow>
                   <TableCell>Folio</TableCell>
                   <TableCell>Estudiante</TableCell>
+                  <TableCell>Nivel Educativo</TableCell>
+                  <TableCell>Tutor</TableCell>
                   <TableCell>Fecha de Creación</TableCell>
                   <TableCell>Mes de Pago</TableCell>
                   <TableCell>Año de Pago</TableCell>
@@ -92,6 +94,8 @@ const PaymentsView = () => {
                       <TableCell>
                         {`${payment.nombre} ${payment.apellido_paterno} ${payment.apellido_materno}`}
                       </TableCell>
+                      <TableCell>{payment.nivel_educativo}</TableCell>
+                      <TableCell>{payment.tutor}</TableCell>
                       <TableCell>
                         {new Date(payment.fecha_creacion).toLocaleDateString()}
                       </TableCell>

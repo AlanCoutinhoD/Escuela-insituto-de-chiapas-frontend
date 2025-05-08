@@ -182,7 +182,6 @@ const StudentsView = ({ readOnly, nivelEducativo }) => {
   };
 
   // Fetch students from backend
-  // Modificar fetchStudents para usar el nivelEducativo si está presente
   const fetchStudents = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -274,6 +273,9 @@ const StudentsView = ({ readOnly, nivelEducativo }) => {
               <MenuItem value="apellido_materno">Apellido Materno</MenuItem>
               <MenuItem value="nivel_educativo">Nivel Educativo</MenuItem>
               <MenuItem value="email">Correo Electrónico</MenuItem>
+              <MenuItem value="tutor">Tutor</MenuItem>
+              <MenuItem value="telefono">Teléfono</MenuItem>
+              <MenuItem value="numero_telefonico_tutor">Teléfono del Tutor</MenuItem>
             </Select>
           </FormControl>
           <TextField
@@ -323,97 +325,80 @@ const StudentsView = ({ readOnly, nivelEducativo }) => {
             Agregar Estudiante
           </Button>
         </Box>
+        
+        {/* Tabla de estudiantes */}
         <TableContainer sx={{ maxHeight: 500 }}>
           <Table stickyHeader>
-            
             <TableHead>
               <TableRow>
                 <TableCell>Nombre</TableCell>
-                <TableCell>Apellido Paterno</TableCell>
-                <TableCell>Apellido Materno</TableCell>
+                <TableCell>Apellidos</TableCell>
                 <TableCell>Nivel Educativo</TableCell>
+                <TableCell>Fecha de Nacimiento</TableCell>
                 <TableCell>Teléfono</TableCell>
                 <TableCell>Email</TableCell>
                 <TableCell>Tutor</TableCell>
+                <TableCell>Teléfono Tutor</TableCell>
                 <TableCell>Día de Pago</TableCell>
                 <TableCell>Monto Mensual</TableCell>
+                <TableCell>Fecha Registro</TableCell>
                 <TableCell>Acciones</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {students.length > 0 ? students.map((student) => (
+              {students.map((student) => (
                 <TableRow key={student.id}>
                   <TableCell>{student.nombre}</TableCell>
-                  <TableCell>{student.apellido_paterno}</TableCell>
-                  <TableCell>{student.apellido_materno}</TableCell>
+                  <TableCell>{`${student.apellido_paterno} ${student.apellido_materno}`}</TableCell>
                   <TableCell>{student.nivel_educativo}</TableCell>
+                  <TableCell>{new Date(student.fecha_nacimiento).toLocaleDateString()}</TableCell>
                   <TableCell>{student.telefono}</TableCell>
                   <TableCell>{student.email}</TableCell>
                   <TableCell>{student.tutor}</TableCell>
-                  <TableCell>{student.dia_pago || '-'}</TableCell>
+                  <TableCell>{student.numero_telefonico_tutor}</TableCell>
+                  <TableCell>{student.dia_pago}</TableCell>
+                  <TableCell>${parseFloat(student.monto_mensual || 0).toFixed(2)}</TableCell>
+                  <TableCell>{student.fecha_registro ? `${new Date(student.fecha_registro).toLocaleDateString()} ${student.hora_registro || ''}` : ''}</TableCell>
                   <TableCell>
-                    {student.monto_mensual 
-                      ? `$${parseFloat(student.monto_mensual).toFixed(2)}` 
-                      : '-'}
-                  </TableCell>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', gap: 1 }}>
-                      <IconButton 
-                        size="small" 
-                        color="primary"
-                        onClick={() => handleOpenEditModal(student)}
-                      >
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton 
-                        size="small" 
-                        color="error"
-                        onClick={() => handleOpenDeleteDialog(student)}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                      <IconButton size="small" color="info">
-                        <VisibilityIcon />
-                      </IconButton>
-                      <IconButton 
-                        size="small" 
-                        color="success"
-                        onClick={() => handleOpenPaymentModal(student)}
-                      >
-                        <ReceiptIcon />
-                      </IconButton>
-                    </Box>
+                    <IconButton 
+                      color="primary" 
+                      onClick={() => handleOpenEditModal(student)}
+                      size="small"
+                    >
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton 
+                      color="error" 
+                      onClick={() => handleOpenDeleteDialog(student)}
+                      size="small"
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                    <IconButton 
+                      color="success" 
+                      onClick={() => handleOpenPaymentModal(student)}
+                      size="small"
+                    >
+                      <ReceiptIcon />
+                    </IconButton>
                   </TableCell>
                 </TableRow>
-              )) : (
-                <TableRow>
-                  <TableCell colSpan={10} align="center">
-                    {isSearching ? 'Buscando estudiantes...' : 'No hay estudiantes registrados.'}
-                  </TableCell>
-                </TableRow>
-              )}
+              ))}
             </TableBody>
           </Table>
         </TableContainer>
       </Paper>
 
       {/* Modales */}
-      {openModal && (
-        <AddStudentModal 
-          open={openModal} 
-          onClose={handleCloseModal} 
-        />
-      )}
-      
-      {openEditModal && selectedStudentForEdit && (
+      <AddStudentModal open={openModal} onClose={handleCloseModal} />
+      {selectedStudentForEdit && (
         <EditStudentModal 
           open={openEditModal} 
           onClose={handleCloseEditModal} 
           student={selectedStudentForEdit} 
         />
       )}
-      
-      {openPaymentModal && selectedStudent && (
+      {selectedStudent && (
         <CreatePaymentModal 
           open={openPaymentModal} 
           onClose={handleClosePaymentModal} 
@@ -425,15 +410,11 @@ const StudentsView = ({ readOnly, nivelEducativo }) => {
       <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog}>
         <DialogTitle>Confirmar eliminación</DialogTitle>
         <DialogContent>
-          ¿Estás seguro que deseas eliminar al estudiante <b>{studentToDelete?.nombre} {studentToDelete?.apellido_paterno}</b>?
+          ¿Está seguro que desea eliminar al estudiante {studentToDelete?.nombre} {studentToDelete?.apellido_paterno}?
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDeleteDialog} color="primary">
-            Cancelar
-          </Button>
-          <Button onClick={handleDeleteStudent} color="error" variant="contained">
-            Eliminar
-          </Button>
+          <Button onClick={handleCloseDeleteDialog}>Cancelar</Button>
+          <Button onClick={handleDeleteStudent} color="error">Eliminar</Button>
         </DialogActions>
       </Dialog>
     </>
