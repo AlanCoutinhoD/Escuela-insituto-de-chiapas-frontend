@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 import { 
   Box, 
   Typography, 
@@ -38,6 +39,7 @@ import EditStudentModal from '../EditStudentModal';
 import CreatePaymentModal from '../CreatePaymentModal';
 
 const StudentsView = ({ readOnly, nivelEducativo }) => {
+  const navigate = useNavigate();
   const [students, setStudents] = useState([]);
   const [openModal, setOpenModal] = useState(false);
   const [openEditModal, setOpenEditModal] = useState(false);
@@ -112,6 +114,22 @@ const StudentsView = ({ readOnly, nivelEducativo }) => {
     setStudentToDelete(null);
   };
 
+  const handleViewPayments = (student) => {
+    if (!student || !student.id) {
+      toast.error('Error: No se pudo obtener la información del estudiante', {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      return;
+    }
+    
+    const currentYear = new Date().getFullYear();
+    console.log('Navegando a pagos con parámetros:', { studentId: student.id, year: currentYear });
+    navigate(`/admin/payments/student/${student.id}/year/${currentYear}`, {
+      state: { studentId: student.id, year: currentYear }
+    });
+  };
+  
   const handleDeleteStudent = async () => {
     if (!studentToDelete) return;
     try {
@@ -381,6 +399,14 @@ const StudentsView = ({ readOnly, nivelEducativo }) => {
                     >
                       <ReceiptIcon />
                     </IconButton>
+                    <IconButton 
+                      color="info"
+                      onClick={() => handleViewPayments(student)}
+                      size="small"
+                      title="Ver historial de pagos"
+                    >
+                      <VisibilityIcon />
+                    </IconButton>
                   </TableCell>
                 </TableRow>
               ))}
@@ -422,3 +448,4 @@ const StudentsView = ({ readOnly, nivelEducativo }) => {
 };
 
 export default StudentsView;
+

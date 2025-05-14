@@ -12,7 +12,10 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/admin/*" element={
           <ProtectedRoute>
-            <AdminView />
+            <Routes>
+              <Route path="/" element={<AdminView />} />
+              <Route path="payments/student/:studentId/year/:year" element={<AdminView />} />
+            </Routes>
           </ProtectedRoute>
         } />
         <Route path="/user/*" element={

@@ -28,33 +28,54 @@ import ReceiptIcon from '@mui/icons-material/Receipt';
 import DeleteIcon from '@mui/icons-material/Delete';
 import axios from 'axios';
 import jsPDF from 'jspdf';
+import { useParams, useLocation } from 'react-router-dom';
 
 const PaymentsView = () => {
+  const params = useParams();
+  const location = useLocation(); // Agregar esta línea
+  
+  // Intentar obtener los parámetros de múltiples fuentes
+  const studentId = params?.studentId || location?.state?.studentId || null;
+  const year = params?.year || location?.state?.year || null;
+  
+  // Convertir a números si existen
+  const numericStudentId = studentId ? Number(studentId) : null;
+  const numericYear = year ? Number(year) : null;
   const [folios, setFolios] = useState([]);
   const [tipoSeleccionado, setTipoSeleccionado] = useState('todos');
-  const [nivelesEducativos, setNivelesEducativos] = useState([]);
-  // Add these missing state variables
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [folioToDelete, setFolioToDelete] = useState(null);
 
-  // Fetch folios from backend
-  const fetchFolios = async (tipo = 'todos') => {
+  // Modificamos la función fetchFolios para asegurar que use la URL correcta
+  const fetchFolios = async () => {
     try {
       const token = localStorage.getItem('token');
-      let url = `https://escuelaback-production.up.railway.app/api/payments/all`;
+      let url;
       
-     
-      
-      const response = await axios.get(
-        url,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+      // Verificar que los parámetros sean válidos y no nulos
+      if (studentId !== null && year !== null && !isNaN(studentId) && !isNaN(year)) {
+        console.log('Parámetros válidos detectados:', { studentId, year });
+        url = `https://escuelaback-production.up.railway.app/api/payments/student/${studentId}/year/${year}`;
+      } else {
+        console.log('Parámetros inválidos o no presentes:', { studentId, year });
+        url = 'https://escuelaback-production.up.railway.app/api/payments/all';
+      }
+
+      console.log('URL final:', url);
+
+      const response = await axios.get(url, {
+        headers: {
+          'Authorization': `Bearer ${token}`
         }
-      );
+      });
+      
+      if (!response.data) {
+        throw new Error('No se recibieron datos del servidor');
+      }
+      
       setFolios(response.data);
     } catch (error) {
+      console.error('Error completo:', error);
       toast.error('Error al cargar los folios', {
         position: "top-right",
         autoClose: 3000,
@@ -62,61 +83,23 @@ const PaymentsView = () => {
     }
   };
 
-  // Obtener niveles educativos únicos
-  const fetchNivelesEducativos = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(
-        `https://escuelaback-production.up.railway.app/api/students/niveles`,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
-      
-      // Si la API no proporciona los niveles, usar una lista predefinida
-      if (!response.data || response.data.length === 0) {
-        setNivelesEducativos([
-          'Preescolar',
-          'Primaria',
-          'Secundaria',
-          'Preparatoria',
-          'Universidad',
-          'Examen',
-          'Curso belleza',
-          'Constancia'
-        ]);
-      } else {
-        setNivelesEducativos(response.data);
-      }
-    } catch (error) {
-      // Si hay error, usar una lista predefinida
-      setNivelesEducativos([
-        'Preescolar',
-        'Primaria',
-        'Secundaria',
-        'Preparatoria',
-        'Universidad',
-        'Examen',
-        'Curso belleza',
-        'Constancia'
-      ]);
+  // Simplificamos el useEffect y agregamos validación
+  useEffect(() => {
+    if (!isNaN(studentId) && !isNaN(year)) {
+      console.log('Cargando folios para estudiante específico:', { studentId, year });
+    } else {
+      console.log('Cargando todos los folios');
     }
-  };
-
-  useEffect(() => {
     fetchFolios();
-    fetchNivelesEducativos();
-  }, []);
+  }, [studentId, year]);
 
-  // Actualizar folios cuando cambia el tipo seleccionado
-  useEffect(() => {
-    fetchFolios(tipoSeleccionado);
-  }, [tipoSeleccionado]);
+  // Eliminamos el segundo useEffect que era redundante
 
+  // y modificamos el handleTipoChange
   const handleTipoChange = (event) => {
     setTipoSeleccionado(event.target.value);
+    // Si necesitas filtrar por tipo, hazlo aquí con los datos existentes
+    // en lugar de hacer otra llamada al API
   };
 
   // Actualizar la función de generación de PDF para incluir los nuevos campos
@@ -156,6 +139,7 @@ const PaymentsView = () => {
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(12);
       doc.text('RECIBO DE PAGO', boxX + 10, boxY + 18);
+      // Corregimos el texto del slogan que tenía caracteres extra
       doc.setFontSize(8);
       doc.text('UN PASO ADELANTE EN EDUCACION', boxX + 10, boxY + 24);
       doc.setFontSize(10);
@@ -326,64 +310,76 @@ const PaymentsView = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {folios.map((payment) => {
-                // Calcular el monto restante
-                const abono = parseFloat(payment.abono) || 0;
-                const total = parseFloat(payment.total) || 0;
-                const restante = total - abono;
-                
-                return (
-                  <TableRow key={payment.id}>
-                    <TableCell>{payment.folio}</TableCell>
-                    <TableCell>
-                      {`${payment.nombre} ${payment.apellido_paterno} ${payment.apellido_materno}`}
-                    </TableCell>
-                    <TableCell>{payment.nivel_educativo}</TableCell>
-                    <TableCell>{payment.tutor}</TableCell>
-                    <TableCell>
-                      {new Date(payment.fecha_creacion).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      {new Date(0, payment.mes_pago - 1).toLocaleString('es-ES', { month: 'long' })}
-                    </TableCell>
-                    <TableCell>{payment.anio_pago}</TableCell>
-                    <TableCell>${abono.toFixed(2)}</TableCell>
-                    <TableCell>${total.toFixed(2)}</TableCell>
-                    <TableCell>
-                      {restante <= 0 ? (
-                        <Chip 
-                          label="PAGADO" 
-                          color="success" 
+              {folios.length > 0 ? (
+                folios.map((payment) => {
+                  const abono = parseFloat(payment.abono) || 0;
+                  const total = parseFloat(payment.total) || 0;
+                  const restante = total - abono;
+                  
+                  return (
+                    <TableRow key={payment.id}>
+                      <TableCell>{payment.folio}</TableCell>
+                      <TableCell>
+                        {`${payment.nombre} ${payment.apellido_paterno} ${payment.apellido_materno}`}
+                      </TableCell>
+                      <TableCell>{payment.nivel_educativo}</TableCell>
+                      <TableCell>{payment.tutor}</TableCell>
+                      <TableCell>
+                        {new Date(payment.fecha_creacion).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        {new Date(0, payment.mes_pago - 1).toLocaleString('es-ES', { month: 'long' })}
+                      </TableCell>
+                      <TableCell>{payment.anio_pago}</TableCell>
+                      <TableCell>${abono.toFixed(2)}</TableCell>
+                      <TableCell>${total.toFixed(2)}</TableCell>
+                      <TableCell>
+                        {restante <= 0 ? (
+                          <Chip 
+                            label="PAGADO" 
+                            color="success" 
+                            size="small"
+                            sx={{ fontWeight: 'bold' }}
+                          />
+                        ) : (
+                          <span style={{ color: '#d32f2f', fontWeight: 'bold' }}>
+                            ${restante.toFixed(2)}
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <IconButton 
+                          color="primary" 
+                          onClick={() => handlePrintFolio(payment)}
                           size="small"
-                          sx={{ fontWeight: 'bold' }}
-                        />
-                      ) : (
-                        <span style={{ color: '#d32f2f', fontWeight: 'bold' }}>
-                          ${restante.toFixed(2)}
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <IconButton 
-                        color="primary" 
-                        onClick={() => handlePrintFolio(payment)}
-                        size="small"
-                        title="Imprimir folio"
-                      >
-                        <ReceiptIcon />
-                      </IconButton>
-                      <IconButton 
-                        color="error" 
-                        onClick={() => handleOpenDeleteDialog(payment)}
-                        size="small"
-                        title="Eliminar folio"
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+                          title="Imprimir folio"
+                        >
+                          <ReceiptIcon />
+                        </IconButton>
+                        <IconButton 
+                          color="error" 
+                          onClick={() => handleOpenDeleteDialog(payment)}
+                          size="small"
+                          title="Eliminar folio"
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={11} align="center" sx={{ py: 4 }}>
+                    <Typography variant="h6" sx={{ color: '#666', fontWeight: 'medium' }}>
+                      {studentId ? 
+                        'No hay folios de pago registrados para este estudiante' :
+                        'No hay folios de pago registrados'
+                      }
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </TableContainer>

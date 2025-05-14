@@ -33,8 +33,24 @@ const drawerWidth = 240;
 const AdminView = () => {
   const [currentView, setCurrentView] = useState('students');
   const [selectedNivel, setSelectedNivel] = useState(null);
+  // Add these new state variables
+  const [selectedStudentId, setSelectedStudentId] = useState(null);
+  const [selectedYear, setSelectedYear] = useState(null);
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+  // Add this useEffect to handle URL parameters
+  useEffect(() => {
+    const path = window.location.pathname;
+    if (path.includes('/admin/payments/student/')) {
+      const matches = path.match(/\/admin\/payments\/student\/(\d+)\/year\/(\d+)/);
+      if (matches) {
+        setSelectedStudentId(matches[1]);
+        setSelectedYear(matches[2]);
+        setCurrentView('payments');
+      }
+    }
+  }, [window.location.pathname]); // Agregamos la dependencia para que se ejecute cuando cambie la URL
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -212,7 +228,9 @@ const AdminView = () => {
           </>
         )}
         {currentView === 'users' && <UsersView />}
-        {currentView === 'payments' && <PaymentsView />}
+        {(currentView === 'payments' || window.location.pathname.includes('/admin/payments/student/')) && (
+          <PaymentsView studentId={selectedStudentId} year={selectedYear} />
+        )}
       </Box>
     </Box>
   );
