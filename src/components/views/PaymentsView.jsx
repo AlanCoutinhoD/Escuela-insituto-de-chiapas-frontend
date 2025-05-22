@@ -52,7 +52,7 @@ const PaymentsView = () => {
       const token = localStorage.getItem('token');
       let url;
       
-      // Verificar que los parámetros sean válidos y no nulos
+      
       if (studentId !== null && year !== null && !isNaN(studentId) && !isNaN(year)) {
         console.log('Parámetros válidos detectados:', { studentId, year });
         url = `https://escuelaback-production.up.railway.app/api/payments/student/${studentId}/year/${year}`;
@@ -279,6 +279,34 @@ const PaymentsView = () => {
     }
   };
 
+  // Agregar función para limpiar filtros
+  const handleClearFilters = () => {
+    // Limpiar el estado de los filtros
+    setTipoSeleccionado('todos');
+    // Recargar todos los folios
+    const fetchAllFolios = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get(
+          'https://escuelaback-production.up.railway.app/api/payments/all',
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }
+        );
+        setFolios(response.data);
+      } catch (error) {
+        console.error('Error al cargar todos los folios:', error);
+        toast.error('Error al cargar los folios', {
+          position: "top-right",
+          autoClose: 3000,
+        });
+      }
+    };
+    fetchAllFolios();
+  };
+
   return (
     <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
       <Toolbar />
@@ -289,6 +317,18 @@ const PaymentsView = () => {
         <Typography variant="body1" sx={{ color: '#666' }}>
           Administre los folios de pago de los estudiantes
         </Typography>
+      </Box>
+
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+        <Button
+          variant="outlined"
+          color="primary"
+          onClick={handleClearFilters}
+          startIcon={<DeleteIcon />}
+          sx={{ mr: 2 }}
+        >
+          Limpiar Filtros
+        </Button>
       </Box>
     
       <Paper sx={{ p: 3, backgroundColor: 'white', borderRadius: 2 }}>
