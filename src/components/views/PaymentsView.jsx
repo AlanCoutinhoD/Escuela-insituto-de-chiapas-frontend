@@ -32,7 +32,7 @@ import { useParams, useLocation } from 'react-router-dom';
 
 const PaymentsView = () => {
   const params = useParams();
-  const location = useLocation(); // Agregar esta línea
+  const location = useLocation(); 
   
   // Intentar obtener los parámetros de múltiples fuentes
   const studentId = params?.studentId || location?.state?.studentId || null;
